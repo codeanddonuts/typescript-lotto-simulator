@@ -6,9 +6,10 @@ export abstract class Maybe<a> {
   abstract map<b>(f: (x: a) => b | null | undefined): Maybe<b>
   abstract bind<b>(f: (x: a) => Maybe<b>): Maybe<b>
   abstract filter(f: (x: a) => boolean): Maybe<a>
-  abstract orElse(defaultValue: a): a
-  abstract orElseLazy(lazyDefaultValue: () => a): a
-  abstract orElseThrow(e?: Error): a | never
+  abstract or(m: Maybe<a>): Maybe<a>
+  abstract getOrDefault(defaultValue: a): a
+  abstract getOrDefaultLazy(lazyDefaultValue: () => a): a
+  abstract getOrThrow(e?: Error): a | never
   
 }
 
@@ -29,15 +30,19 @@ export class Just<a> extends Maybe<a> {
     return f(this.val) ? this : new Nothing()
   }
 
-  public orElse(defaultValue: a): a {
+  public or(m: Maybe<a>): Maybe<a> {
+    return this
+  }
+
+  public getOrDefault(defaultValue: a): a {
     return this.val;
   }
 
-  public orElseLazy(lazyDefaultValue: () => a): a {
+  public getOrDefaultLazy(lazyDefaultValue: () => a): a {
     return this.val
   }
 
-  public orElseThrow(e?: Error): a | never {
+  public getOrThrow(e?: Error): a | never {
     return this.val
   }
 }
@@ -55,15 +60,19 @@ export class Nothing<a> extends Maybe<a> {
     return this
   }
 
-  public orElse(defaultValue: a): a {
+  public or(m: Maybe<a>): Maybe<a> {
+    return m
+  }
+
+  public getOrDefault(defaultValue: a): a {
     return defaultValue
   }
 
-  public orElseLazy(lazyDefaultValue: () => a): a {
+  public getOrDefaultLazy(lazyDefaultValue: () => a): a {
     return lazyDefaultValue()
   }
 
-  public orElseThrow(e?: Error): a | never {
+  public getOrThrow(e?: Error): a | never {
     throw e ?? new Error()
   }
 }

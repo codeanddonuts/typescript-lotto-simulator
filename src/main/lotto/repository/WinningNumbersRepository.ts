@@ -40,16 +40,20 @@ export class WinningNumbersWebRepository implements WinningNumbersRepository {
   private async fetchFromWeb(round: Round): Promise<WinningNumbers> | never {
     return this.extractNumbers(await this.requestAnnouncement(round)).map(numbers =>
       this.validateNumbers(round, numbers[0], numbers[1])
-    ).orElseThrow()
+    ).getOrThrow()
   }
 
   private async fetchRecentFromWeb(): Promise<WinningNumbers> | never {
     const response = await this.requestAnnouncement()
-    return this.extractNumbers(response).bind(numbers =>
-      Maybe.cons(response.match(/<option value="\d+"  >/)?.shift())
-           .map(x => parseInt(x.substring(15, x.indexOf("  >"))))
-           .map(round => this.validateNumbers(new Round(round), numbers[0], numbers[1]))
-    ).orElseThrow()
+    return Maybe.cons(response.match(/<option value="\d+"  >/)?.shift())
+                .map(str => new Round(parseInt(str.substring(15, str.indexOf("  >")))))
+                .bind(round =>
+                  Maybe.cons(
+                      this.CACHE.get(round)
+                  ).or(
+                      this.extractNumbers(response).map(numbers => this.validateNumbers(round, numbers[0], numbers[1]))
+                  )
+                ).getOrThrow()
   }
 
   private async requestAnnouncement(round?: Round): Promise<string> | never {
