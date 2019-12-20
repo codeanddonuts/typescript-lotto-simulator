@@ -1,38 +1,49 @@
 import { Round } from "../domain/Round"
 import { WinningNumbers } from "../domain/WinningNumbers"
-import { WinningNumbersHistory } from "../repository/WinningNumbersHistory"
 import { Game, PickedNumberCons, SixPicksCons } from "../domain/Game"
 import axios from "axios"
 import { Maybe } from "../../utils/Maybe"
 import * as iconv from "iconv-lite"
+import { ValueObjectKeyMap } from "../../utils/ValueObject"
 
-export class WinnerAnnouncement {
+export interface WinningNumbersRepository {
+  of(round: Round): Promise<WinningNumbers> | never
+  recent(): Promise<WinningNumbers> | never
+}
+
+export class WinningNumbersWebRepository implements WinningNumbersRepository {
   private static readonly FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
   private static readonly ROUND_ATTR = "&drwNo="
 
-  public static async recent(): Promise<WinningNumbers> {
-    return await this.fetchRecentFromWeb()
-  }
+  private readonly CACHE: Map<Round, WinningNumbers> = new ValueObjectKeyMap()
 
-  public static async of(round: Round): Promise<WinningNumbers> | never {
+  public async of(round: Round): Promise<WinningNumbers> | never {
     try {
-      return await WinningNumbersHistory.findOne(round) ?? (async () => {
+      return this.CACHE.get(round) ?? (async () => {
         const result = await this.fetchFromWeb(round)
-        WinningNumbersHistory.save(result)
+        this.CACHE.set(round, result)
         return result
       })()
     } catch (e) {
-      throw new Error("당첨 번호를 가져오는 데에 실패하였습니다.")
+      throw new Error(`${round}회차의 당첨 번호를 가져오는 데에 실패하였습니다.`)
     }
   }
 
-  private static async fetchFromWeb(round: Round): Promise<WinningNumbers> | never {
+  public async recent(): Promise<WinningNumbers> | never {
+    try {
+      return await this.fetchRecentFromWeb()
+    } catch (e) {
+      throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
+    }
+  }
+
+  private async fetchFromWeb(round: Round): Promise<WinningNumbers> | never {
     return this.extractNumbers(await this.requestAnnouncement(round)).map(numbers =>
       this.validateNumbers(round, numbers[0], numbers[1])
     ).orElseThrow()
   }
 
-  private static async fetchRecentFromWeb(): Promise<WinningNumbers> | never {
+  private async fetchRecentFromWeb(): Promise<WinningNumbers> | never {
     const response = await this.requestAnnouncement()
     return this.extractNumbers(response).bind(numbers =>
       Maybe.cons(response.match(/<option value="\d+"  >/)?.shift())
@@ -41,14 +52,15 @@ export class WinnerAnnouncement {
     ).orElseThrow()
   }
 
-  private static async requestAnnouncement(round?: Round): Promise<string> | never {
+  private async requestAnnouncement(round?: Round): Promise<string> | never {
+    const url = WinningNumbersWebRepository.FETCH_URL + (round ? WinningNumbersWebRepository.ROUND_ATTR + round : "")
     return iconv.decode(
-      (await axios.get(this.FETCH_URL + (round ? this.ROUND_ATTR + round : ""), { responseType: "arraybuffer" })).data,
+      (await axios.get(url, { responseType: "arraybuffer" })).data,
       "euc-kr"
     ).toString()
   }
 
-  private static extractNumbers(str: string): Maybe<[number[], number]> {
+  private extractNumbers(str: string): Maybe<[number[], number]> {
     return Maybe.cons(str.match(/>\d+<\/span>/g)?.map(x => parseInt(x.substring(1, x.indexOf("</span>")))))
                 .bind(numbers =>
                   Maybe.cons(numbers.pop()).map(bonus =>
@@ -57,7 +69,7 @@ export class WinnerAnnouncement {
                 )
   }
 
-  private static validateNumbers(round: Round, mains: number[], bonus: number): WinningNumbers {
+  private validateNumbers(round: Round, mains: number[], bonus: number): WinningNumbers | never {
     return new WinningNumbers(round, new Game(SixPicksCons(mains.map(n => PickedNumberCons(n)))), PickedNumberCons(bonus))
   }
 }

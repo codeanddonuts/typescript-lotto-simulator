@@ -1,10 +1,10 @@
 export default class ContainerUtils {
-  public static range(begin: number, end: number): number[] {
+  public static intRange(begin: number, end: number): number[] {
     return Array.from(Array(end - begin).keys()).map(n => n + begin)
   }
 
-  public static rangeClosed(begin: number, end: number): number[] {
-    return this.range(begin, end + 1)
+  public static intRangeClosed(begin: number, end: number): number[] {
+    return this.intRange(begin, end + 1)
   }
 
   public static shuffle<T>(arr: T[]): T[] {

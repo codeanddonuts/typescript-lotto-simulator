@@ -11,7 +11,7 @@ export type PickedNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
     | 28 | 29 | 30 | 31 | 32 | 33 | 34 | 35 | 36
     | 37 | 38 | 39 | 40 | 41 | 42 | 43 | 44 | 45
 
-export const PickedNumberCons = (n: number): PickedNumber => {
+export const PickedNumberCons = (n: number): PickedNumber | never => {
   if (PICK_RANGE.MIN <= n && n <= PICK_RANGE.MAX) {
     return n as PickedNumber
   }
@@ -26,7 +26,7 @@ type ArrayOfSixElements<T> = [T, T, T, T, T, T]
 
 export type SixPicks = ArrayOfSixElements<PickedNumber>
 
-export const SixPicksCons = (pickedNumbers: PickedNumber[]): SixPicks => {
+export const SixPicksCons = (pickedNumbers: PickedNumber[]): SixPicks | never => {
   if (pickedNumbers.length === NUMBER_OF_PICKS) {
     return pickedNumbers as SixPicks
   }
@@ -34,7 +34,7 @@ export const SixPicksCons = (pickedNumbers: PickedNumber[]): SixPicks => {
 }
 
 export class Game {
-  private static readonly BALLS: PickedNumber[] = ContainerUtils.rangeClosed(PICK_RANGE.MIN, PICK_RANGE.MAX)
+  private static readonly BALLS: PickedNumber[] = ContainerUtils.intRangeClosed(PICK_RANGE.MIN, PICK_RANGE.MAX)
                                                                 .map(n => PickedNumberCons(n))
   
   private readonly picks: ReadonlySet<PickedNumber>

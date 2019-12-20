@@ -2,18 +2,13 @@ import { Ticket } from "./Ticket"
 import { WinningNumbers } from "./WinningNumbers"
 import { ValueObjectKeyMap } from "../../utils/ValueObject"
 import { GameResult } from "./GameResult"
-import { WinnerAnnouncement } from "../service/WinnerAnnouncement"
 import { Money } from "./Money"
 
 export class TicketResult implements Iterable<[GameResult, number]> {
   private readonly result: ReadonlyMap<GameResult, number>
   private readonly _totalPrize: Money
 
-  static async of(ticket: Ticket): Promise<TicketResult> {
-    return new TicketResult(ticket, await WinnerAnnouncement.of(ticket.round))
-  }
-
-  private constructor(ticket: Ticket, winningNumbers: WinningNumbers) {
+  public constructor(ticket: Ticket, winningNumbers: WinningNumbers) {
     const tmp: Map<GameResult, number> = new ValueObjectKeyMap()
     ticket.map(game =>
       GameResult.of(game.numberOfMatchesTo(winningNumbers.mains), game.contains(winningNumbers.bonus))

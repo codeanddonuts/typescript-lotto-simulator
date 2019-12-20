@@ -2,7 +2,7 @@ import ValueObject, { hash } from "../../utils/ValueObject"
 import { NumberOfMatches } from "./Game"
 import { Money } from "./Money"
 
-const enum Placement {
+export const enum Placement {
   FIRST = "1등",
   SECOND = "2등",
   THIRD = "3등",

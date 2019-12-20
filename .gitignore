@@ -1,5 +1,9 @@
-.DS_Store
+out/
 
 node_modules/
-out/
 package.json
+
+coverage/
+report.*.json
+
+.DS_Store
