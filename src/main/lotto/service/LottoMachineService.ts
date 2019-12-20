@@ -16,11 +16,10 @@ export class LottoMachineService {
   }
   
   public async printTicket(): Promise<Ticket> | never {
-    console.log(this.buffer.length)
     if (this.buffer.length === 0) {
       throw new Error("먼저 번호를 입력하세요.")
     }
-    const tmp: Game[] = this.buffer
+    const tmp = [...this.buffer]
     this.buffer.length = 0
     return new Ticket((await this.winningNumbersRepository.recent()).round, tmp)
   }
