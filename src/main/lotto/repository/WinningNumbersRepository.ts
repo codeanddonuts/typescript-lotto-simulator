@@ -45,11 +45,12 @@ export class WinningNumbersWebRepository implements WinningNumbersRepository {
 
   private async fetchRecentFromWeb(): Promise<WinningNumbers> | never {
     const response = await this.requestAnnouncement()
-    return this.extractNumbers(response).bind(numbers =>
-      Maybe.cons(response.match(/<option value="\d+"  >/)?.shift())
-           .map(x => parseInt(x.substring(15, x.indexOf("  >"))))
-           .map(round => this.validateNumbers(new Round(round), numbers[0], numbers[1]))
-    ).orElseThrow()
+    return Maybe.cons(response.match(/<option value="\d+"  >/)?.shift())
+                .map(str => new Round(parseInt(str.substring(15, str.indexOf("  >")))))
+                .bind(round => {
+                  return Maybe.cons(this.CACHE.get(round))
+                      ?? this.extractNumbers(response).map(numbers => this.validateNumbers(round, numbers[0], numbers[1]))
+                }).orElseThrow()
   }
 
   private async requestAnnouncement(round?: Round): Promise<string> | never {
