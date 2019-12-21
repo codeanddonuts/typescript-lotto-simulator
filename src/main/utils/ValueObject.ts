@@ -57,42 +57,15 @@ export class ValueObjectKeyMap<K extends ValueObject, V> implements Map<K, V> {
   }
 
   entries(): IterableIterator<[K, V]> {
-    const self = this
-    return new class {
-      public next(...args: [] | [undefined]): IteratorResult<[K, V], any> {
-        return self.map.values().next()
-      }
-
-      public [Symbol.iterator](): IterableIterator<[K, V]> {
-        return this
-      }
-    }
+    return this.map.values()
   }
 
   keys(): IterableIterator<K> {
-    const self = this
-    return new class {
-      public next(...args: [] | [undefined]): IteratorResult<K, any> {
-        return [...self.map.values()].map(x => x[0]).values().next()
-      }
-
-      public [Symbol.iterator](): IterableIterator<K> {
-        return this
-      }
-    }
+    return Array.from(this.map.values(), x => x[0]).values()
   }
 
   values(): IterableIterator<V> {
-    const self = this
-    return new class {
-      public next(...args: [] | [undefined]): IteratorResult<V, any> {
-        return [...self.map.values()].map(x => x[1]).values().next()
-      }
-
-      public [Symbol.iterator](): IterableIterator<V> {
-        return this
-      }
-    }
+    return Array.from(this.map.values(), x => x[1]).values()
   }
 
   get [Symbol.toStringTag]() {

@@ -48,9 +48,7 @@ export class WinningNumbersWebRepository implements WinningNumbersRepository {
     return Maybe.cons(response.match(/<option value="\d+"  >/)?.shift())
                 .map(str => new Round(parseInt(str.substring(15, str.indexOf("  >")))))
                 .bind(round =>
-                  Maybe.cons(
-                      this.CACHE.get(round)
-                  ).or(
+                  Maybe.cons(this.CACHE.get(round)).or(
                       this.extractNumbers(response).map(numbers => this.validateNumbers(round, numbers[0], numbers[1]))
                   )
                 ).getOrThrow()
@@ -67,9 +65,7 @@ export class WinningNumbersWebRepository implements WinningNumbersRepository {
   private extractNumbers(str: string): Maybe<[number[], number]> {
     return Maybe.cons(str.match(/>\d+<\/span>/g)?.map(x => parseInt(x.substring(1, x.indexOf("</span>")))))
                 .bind(numbers =>
-                  Maybe.cons(numbers.pop()).map(bonus =>
-                    [numbers, bonus]
-                  )
+                  Maybe.cons(numbers.pop()).map(bonus =>[numbers, bonus])
                 )
   }
 
