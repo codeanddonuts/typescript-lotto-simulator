@@ -23,10 +23,10 @@ export class WinningNumbers implements ValueObject {
     } else if (!(rhs instanceof WinningNumbers)) {
       return false
     }
-    return this.round.equals(rhs.round)
+    return this._round.equals(rhs._round)
   }
 
   hashCode() {
-    return this.round.hashCode()
+    return this._round.hashCode()
   }
 }

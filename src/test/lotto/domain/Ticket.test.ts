@@ -8,7 +8,7 @@ beforeEach(() => {
   ticket = new Ticket(new Round(123), [Game.autoGen(), Game.autoGen(), Game.autoGen()])
 })
 
-describe("Ticket to ...", () => {
+describe("Ticket mapped to ...", () => {
   it("5", () =>
     expect(ticket.map(game => 5) ).toEqual([5, 5, 5])
   )

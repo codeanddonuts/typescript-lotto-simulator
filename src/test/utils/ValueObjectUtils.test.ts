@@ -1,4 +1,5 @@
-import ValueObject, { ValueObjectKeyMap, hash } from "../../main/utils/ValueObject"
+import ValueObject, { ValueObjectKeyMap } from "../../main/utils/ValueObject"
+import { hash } from "../../main/utils/HashUtils"
 
 class Person implements ValueObject {
   constructor(private readonly name: string, private readonly age: number) {}

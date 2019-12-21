@@ -1,15 +1,17 @@
 import { Ticket } from "../../../main/lotto/domain/Ticket"
 import { Round } from "../../../main/lotto/domain/Round"
 import { Game } from "../../../main/lotto/domain/Game"
-import { WinningNumbersWebRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
+import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
 import { TicketResult } from "../../../main/lotto/domain/TicketResult"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 import { Money } from "../../../main/lotto/domain/Money"
+import { container } from "../../../main/di/inversify.config"
+import { TYPES } from "../../../main/di/types"
 
 let winningNumbers: WinningNumbers
 
 beforeAll(async () => {
-  winningNumbers = await (new WinningNumbersWebRepository()).of(new Round(889))
+  winningNumbers = await (container.get<WinningNumbersRepository>(TYPES.WinningNumbersRepository)).of(new Round(889))
 })
 
 describe("Total prize is ...", () => {

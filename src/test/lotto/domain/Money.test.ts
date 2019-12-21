@@ -11,3 +11,23 @@ describe("Product of money?", () => {
     expect(new Money(10000).product(6)).toEqual(new Money(60000))
   )
 })
+
+describe("Same money?", () => {
+  const money = new Money(10000)
+
+  it("Yes: Same instance", () =>
+    expect(money.equals(money)).toBeTruthy()
+  )
+  
+  it("No: Different type", () =>
+    expect(money.equals(10000)).toBeFalsy()
+  )
+
+  it("Yes: Same values", () =>
+    expect(money.equals(new Money(10000))).toBeTruthy()
+  )
+
+  it("No: Different values", () =>
+    expect(money.equals(new Money(12345))).toBeFalsy()
+  )
+})

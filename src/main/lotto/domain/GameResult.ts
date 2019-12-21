@@ -1,4 +1,5 @@
-import ValueObject, { hash } from "../../utils/ValueObject"
+import ValueObject from "../../utils/ValueObject"
+import { hash } from "../../utils/HashUtils"
 import { NumberOfMatches } from "./Game"
 import { Money } from "./Money"
 

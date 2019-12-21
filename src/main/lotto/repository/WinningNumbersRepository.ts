@@ -5,13 +5,15 @@ import axios from "axios"
 import { Maybe } from "../../utils/Maybe"
 import * as iconv from "iconv-lite"
 import { ValueObjectKeyMap } from "../../utils/ValueObject"
+import { injectable } from "inversify"
 
 export interface WinningNumbersRepository {
   of(round: Round): Promise<WinningNumbers> | never
   recent(): Promise<WinningNumbers> | never
 }
 
-export class WinningNumbersWebRepository implements WinningNumbersRepository {
+@injectable()
+export class WinnerAnnouncement implements WinningNumbersRepository {
   private static readonly FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
   private static readonly ROUND_ATTR = "&drwNo="
 
@@ -55,7 +57,7 @@ export class WinningNumbersWebRepository implements WinningNumbersRepository {
   }
 
   private async requestAnnouncement(round?: Round): Promise<string> | never {
-    const url = WinningNumbersWebRepository.FETCH_URL + (round ? WinningNumbersWebRepository.ROUND_ATTR + round : "")
+    const url = WinnerAnnouncement.FETCH_URL + (round ? WinnerAnnouncement.ROUND_ATTR + round : "")
     return iconv.decode(
       (await axios.get(url, { responseType: "arraybuffer" })).data,
       "euc-kr"
