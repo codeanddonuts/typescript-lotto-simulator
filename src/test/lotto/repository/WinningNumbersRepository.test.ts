@@ -2,8 +2,8 @@ import { Round } from "../../../main/lotto/domain/Round"
 import { Game } from "../../../main/lotto/domain/Game"
 import moment from "moment"
 import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
-import { container } from "../../../main/di/inversify.config"
-import { TYPES } from "../../../main/di/types"
+import { container } from "../../../main/di/Inversify.config"
+import { TYPES } from "../../../main/di/Types"
 
 let winningNumbersRepository: WinningNumbersRepository
 

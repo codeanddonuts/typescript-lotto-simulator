@@ -13,7 +13,7 @@ export interface WinningNumbersRepository {
 }
 
 @injectable()
-export class WinnerAnnouncement implements WinningNumbersRepository {
+export class WinningNumbersWebCrawler implements WinningNumbersRepository {
   private static readonly FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
   private static readonly ROUND_ATTR = "&drwNo="
 
@@ -57,7 +57,7 @@ export class WinnerAnnouncement implements WinningNumbersRepository {
   }
 
   private async requestAnnouncement(round?: Round): Promise<string> | never {
-    const url = WinnerAnnouncement.FETCH_URL + (round ? WinnerAnnouncement.ROUND_ATTR + round : "")
+    const url = WinningNumbersWebCrawler.FETCH_URL + (round ? WinningNumbersWebCrawler.ROUND_ATTR + round : "")
     return iconv.decode(
       (await axios.get(url, { responseType: "arraybuffer" })).data,
       "euc-kr"

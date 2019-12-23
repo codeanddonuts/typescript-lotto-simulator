@@ -2,7 +2,7 @@ import { Game, SixPicks } from "../domain/Game"
 import { Ticket } from "../domain/Ticket"
 import { WinningNumbersRepository } from "../repository/WinningNumbersRepository"
 import { injectable, inject } from "inversify"
-import { TYPES } from "../../di/types"
+import { TYPES } from "../../di/Types"
 
 @injectable()
 export class LottoMachine {

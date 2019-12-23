@@ -5,8 +5,8 @@ import { WinningNumbersRepository } from "../../../main/lotto/repository/Winning
 import { TicketResult } from "../../../main/lotto/domain/TicketResult"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 import { Money } from "../../../main/lotto/domain/Money"
-import { container } from "../../../main/di/inversify.config"
-import { TYPES } from "../../../main/di/types"
+import { container } from "../../../main/di/Inversify.config"
+import { TYPES } from "../../../main/di/Types"
 
 let winningNumbers: WinningNumbers
 

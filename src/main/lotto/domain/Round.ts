@@ -16,8 +16,7 @@ export class Round implements ValueObject {
   equals(rhs: any) {
     if (this === rhs) {
       return true
-    }
-    else if (!(rhs instanceof Round)) {
+    } else if (!(rhs instanceof Round)) {
       return false
     }
     return this.number === rhs.number
