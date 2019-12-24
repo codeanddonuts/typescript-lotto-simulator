@@ -3,9 +3,12 @@ import { Ticket } from "../domain/Ticket"
 import { WinningNumbersRepository } from "../repository/WinningNumbersRepository"
 import { injectable, inject } from "inversify"
 import { TYPES } from "../../di/Types"
+import { Money } from "../domain/Money"
 
 @injectable()
 export class LottoMachine {
+  public static PRICE_PER_GAME = new Money(1000)
+  
   private readonly buffer: Game[] = []
 
   constructor(@inject(TYPES.WinningNumbersRepository) private readonly winningNumbersRepository: WinningNumbersRepository) {}

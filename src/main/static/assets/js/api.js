@@ -1,22 +1,33 @@
-const BASE_URL = "http://localhost:4567"
+let price
 
-function submit(type) {
-    const data = Object.fromEntries(new FormData(document.getElementById(type)))
+(async () => {
+  try {
+    price = (await axios.get("/api/price")).data.amount
+    document.getElementById("priceFormatted").innerText = new Intl.NumberFormat(
+        "ko-KR",
+        { style: "currency", currency: "KRW" }
+    ).format(price)
+  } catch (e) {}
+})()
+
+const submit = async type => {
+  const data = Object.fromEntries(new FormData(document.getElementById(type)))
+  try {
+    const result = (await axios.post(
+      "/api" + type,
+      data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })).data
     deleteFrontPage()
-    axios.post(BASE_URL + "/" + type,
-        data, {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }).then(res => document.getElementById("result_page").innerHTML = res.data
-        ).catch(err => document.getElementById("result_page").innerHTML = err.response.data
-    )
+    document.getElementById("result_page").innerHTML = result
+  } catch (e) {
+    deleteFrontPage()
+    document.getElementById("result_page").innerHTML = e.response.data
+  }
 }
 
-function submitHistory() {
-    submit("history")
-}
+const submitHistory = () => submit("history")
 
-function submitPurchase() {
-    submit("purchase")
-}
+const submitPurchase = () => submit("purchase")

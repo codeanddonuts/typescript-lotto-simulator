@@ -1,9 +1,16 @@
 import "reflect-metadata"
 import { Container } from "inversify"
-import { WinningNumbersRepository, WinningNumbersWebCrawler } from "../lotto/repository/WinningNumbersRepository"
 import { TYPES } from "./Types"
+import Router from "koa-router"
+import { ServerConfig } from "../ServerConfig"
+import { ShopController } from "../controller/ShopController"
+import { WinningNumbersRepository, WinningNumbersWebCrawler } from "../lotto/repository/WinningNumbersRepository"
 import { LottoMachine } from "../lotto/service/LottoMachine"
+import { Controller } from "../controller/Controller"
 
 export const container = new Container()
-container.bind<LottoMachine>(LottoMachine).toSelf()
+container.bind<Router>(Router).toConstantValue(new Router())
+container.bind<ServerConfig>(ServerConfig).toSelf()
+container.bind<Controller>(Controller).to(ShopController)
 container.bind<WinningNumbersRepository>(TYPES.WinningNumbersRepository).to(WinningNumbersWebCrawler)
+container.bind<LottoMachine>(LottoMachine).toSelf()
