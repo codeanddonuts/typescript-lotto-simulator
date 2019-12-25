@@ -49,7 +49,7 @@ describe("filter x -> x > 2 ...", () => {
   )
 })
 
-describe("get a or b", () => {
+describe("a or b", () => {
   it("Just 11, Just 41 = Just 11", () =>
     expect((new Just(11)).or(new Just(41))).toEqual(new Just(11))
   )

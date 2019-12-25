@@ -7,10 +7,14 @@ import { LottoMachine } from "../lotto/service/LottoMachine"
 export class ShopController implements Controller {
   constructor(@inject(Router) private readonly router: Router) {
     this.router.get("/", async ctx => {
-      ctx.redirect("/app.html")
+      ctx.redirect("/index.html")
     })
 
     this.router.get("/api/price", async ctx => {
+      ctx.body = LottoMachine.PRICE_PER_GAME
+    })
+
+    this.router.post("/api/purchase", async ctx => {
       ctx.body = LottoMachine.PRICE_PER_GAME
     })
   }

@@ -2824,3 +2824,7 @@ body.is-menu-visible #menu {
     .lotto {
         text-align: center;
     }
+
+div.right, p.right {
+  text-align: right
+}
