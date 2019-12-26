@@ -9,6 +9,10 @@ export class Round implements ValueObject {
     }
   }
 
+  get val() {
+    return this.number
+  }
+
   toString() {
     return this.number
   }

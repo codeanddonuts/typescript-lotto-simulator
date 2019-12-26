@@ -1,4 +1,3 @@
-
 import { Maybe, Just, Nothing } from "../../main/utils/Maybe"
 import { PromiseMaybeTransformer } from "../../main/utils/MaybeT"
 
@@ -138,6 +137,6 @@ describe("get ... or error", () => {
   )
 
   it("MaybeT(Promise(Nothing)) = error", async () => {
-    expect(PromiseMaybeTransformer.cons(Promise.resolve(new Nothing())).getOrThrow()).resolves.toThrow()
+    expect(PromiseMaybeTransformer.cons(Promise.resolve(new Nothing())).getOrThrow()).rejects.toThrow()
   })
 })

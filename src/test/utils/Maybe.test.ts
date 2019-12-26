@@ -1,4 +1,3 @@
-
 import { Maybe, Just, Nothing } from "../../main/utils/Maybe"
 
 describe("Maybe of ...", () => {

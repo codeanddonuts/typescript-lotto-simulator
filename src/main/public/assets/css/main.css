@@ -2825,6 +2825,10 @@ body.is-menu-visible #menu {
         text-align: center;
     }
 
+div.center {
+  text-align: center
+}
+
 div.right, p.right {
   text-align: right
 }

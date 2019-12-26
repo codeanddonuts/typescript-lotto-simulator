@@ -3,7 +3,6 @@ import { Game } from "../../../main/lotto/domain/Game"
 import { LottoMachine } from "../../../main/lotto/service/LottoMachine"
 import { Ticket } from "../../../main/lotto/domain/Ticket"
 import { container } from "../../../main/di/Inversify.config"
-import { TYPES } from "../../../main/di/Types"
 import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 
@@ -11,7 +10,7 @@ let lottoMachineService: LottoMachine
 let recentWinningNumbers: WinningNumbers
 
 beforeAll(async () => {
-  recentWinningNumbers = await container.get<WinningNumbersRepository>(TYPES.WinningNumbersRepository).recent()
+  recentWinningNumbers = await container.get<WinningNumbersRepository>(WinningNumbersRepository).recent()
 })
 
 beforeEach(() => {
@@ -22,6 +21,7 @@ beforeEach(() => {
 afterEach(() => {
   container.restore()
 })
+
 
 describe("Printing ticket ...", () => {
   it("Failed: Purchase game(s) first", () => {

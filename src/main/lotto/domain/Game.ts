@@ -20,6 +20,8 @@ export const PickedNumberCons = (n: number): PickedNumber | never => {
 
 export const NUMBER_OF_PICKS = 6
 
+type IndexOfPick = 1 | 2 | 3 | 4 | 5 | 6
+
 export type NumberOfMatches = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
 type ArrayOfSixElements<T> = [T, T, T, T, T, T]
@@ -57,5 +59,9 @@ export class Game {
   
   public contains(n: PickedNumber): boolean {
     return this.picks.has(n)
+  }
+
+  public getNthPick(i: IndexOfPick): PickedNumber {
+    return [...this.picks.values()][i - 1]
   }
 }

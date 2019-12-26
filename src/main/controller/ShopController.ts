@@ -1,6 +1,6 @@
 import { injectable, inject } from "inversify"
-import Router = require("koa-router")
-import { Controller } from "./Controller"
+import Router from "koa-router"
+import Controller from "./Controller"
 import { LottoMachine } from "../lotto/service/LottoMachine"
 
 @injectable()
