@@ -49,31 +49,13 @@ describe("filter x -> x > 2 ...", () => {
   )
 })
 
-describe("a or b", () => {
-  it("Just 11, Just 41 = Just 11", () =>
-    expect((new Just(11)).or(new Just(41))).toEqual(new Just(11))
-  )
-
-  it("Nothing, Just 41 = Just 41", () =>
-  expect((new Nothing()).or(new Just(41))).toEqual(new Just(41))
-  )
-})
-
 describe("get ... or 7", () => {
   it("Just 11 = 11", () =>
-    expect((new Just(11)).getOrDefault(7)).toEqual(11)
-  )
-
-  it("Just 11 = 11", () =>
-    expect((new Just(11)).getOrDefaultLazy(() => 7)).toEqual(11)
+    expect((new Just(11)).getOrElse(() => 7)).toEqual(11)
   )
 
   it("Nothing = 7", () =>
-    expect((new Nothing()).getOrDefault(7)).toEqual(7)
-  )
-
-  it("Nothing = 7", () =>
-    expect((new Nothing()).getOrDefaultLazy(() => 7)).toEqual(7)
+    expect((new Nothing()).getOrElse(() => 7)).toEqual(7)
   )
 })
 
