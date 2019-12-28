@@ -3,5 +3,5 @@ import { WinningNumbers } from "../domain/WinningNumbers"
 
 export abstract class WinningNumbersRepository {
   abstract of(round: Round): Promise<WinningNumbers> | never
-  abstract recent(): Promise<WinningNumbers> | never
+  abstract ofRecent(): Promise<WinningNumbers> | never
 }

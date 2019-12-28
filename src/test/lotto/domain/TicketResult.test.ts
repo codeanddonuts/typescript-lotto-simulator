@@ -15,6 +15,6 @@ describe("Total prize is ...", () => {
   
   it("30,005,000", () => {
     const ticket = new Ticket(new Round(889), [new Game([3, 13, 29, 38, 39, 26]), new Game([3, 13, 29, 30, 31, 32])])
-    expect((new TicketResult(ticket, winningNumbers)).totalPrize).toEqual(new Money(30005000))
+    expect((new TicketResult(ticket, winningNumbers)).totalPrize).toEqual(new Money(30_005_000))
   })
 })

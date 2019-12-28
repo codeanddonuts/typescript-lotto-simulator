@@ -10,7 +10,8 @@ import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 let winningNumbersRepository: WinningNumbersRepository
 
 beforeAll(async () => {
-  await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
+  const connection = await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
+  await connection.createQueryRunner().dropTable("winning_numbers", true)
 })
 
 beforeEach(async () => {
@@ -23,7 +24,9 @@ afterEach(async () => {
 })
 
 afterAll(async () => {
-  await getConnection().close().catch(e => console.log(e))
+  const connection = getConnection()
+  await connection.createQueryRunner().dropTable("winning_numbers", true)
+  await connection.close().catch(e => console.log(e))
 })
 
 describe("The winner of round n is ...", () => {
@@ -53,7 +56,7 @@ describe("The winner of the recent round is equal to round n?", () => {
   const RECENT_ROUND = 889 + moment(Date.now()).diff(moment("2019-12-14T12:00:00Z"), "weeks")
   it(`${RECENT_ROUND}`, async () => {
     expect(
-        await winningNumbersRepository.recent()
+        await winningNumbersRepository.ofRecent()
     ).toEqual(
         await winningNumbersRepository.of(new Round(RECENT_ROUND))
     )

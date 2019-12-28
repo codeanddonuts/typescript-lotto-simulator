@@ -25,7 +25,7 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
     }
   }
 
-  public async recent(): Promise<WinningNumbers> | never {
+  public async ofRecent(): Promise<WinningNumbers> | never {
     try {
       const responseBody = await this.requestFromWeb()
       return Maybe.cons(responseBody.match(/<option value="\d+"  >/)?.shift())
@@ -37,16 +37,6 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
     }
   }
 
-  private async retrieveFromCacheOrParseNew(round: Round, responseBody?: string): Promise<WinningNumbers> {
-    return PromiseMaybeTransformer.fromNullable(this.cache.findOne({ where: { round: round.val }, cache: true }))
-                                  .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
-                                  .getOrElse(async () => {
-                                    const winningNumbers = this.parseHtml(round, responseBody ?? await this.requestFromWeb(round))
-                                    this.cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
-                                    return winningNumbers
-                                  })
-  }
-
   private async requestFromWeb(round?: Round): Promise<string> | never {
     const url = WinningNumbersCachedWebCrawler.FETCH_URL + (round ? WinningNumbersCachedWebCrawler.ROUND_ATTR + round : "")
     return iconv.decode(
@@ -55,17 +45,25 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
     ).toString()
   }
 
-  private parseHtml(round: Round, responseBody: string): WinningNumbers | never {
+  private async retrieveFromCacheOrParseNew(round: Round, responseBody?: string): Promise<WinningNumbers> | never {
+    return PromiseMaybeTransformer.fromNullable(this.cache.findOne({ where: { round: round.val }, cache: true }))
+                                  .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
+                                  .getOrElse(async () => {
+                                    const numbers = this.parseHtml(responseBody ?? await this.requestFromWeb(round))
+                                    const winningNumbers = new WinningNumbers(round, numbers.game, numbers.bonus)
+                                    this.cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
+                                    return winningNumbers
+                                  })
+  }
+
+  private parseHtml(responseBody: string): { game: Game, bonus: PickedNumber } | never {
     return Maybe.cons(responseBody.match(/>\d+<\/span>/g)?.map(x => parseInt(x.substring(1, x.indexOf("</span>")))))
                 .bind(numbers =>
                   Maybe.cons(numbers.pop())
-                       .map(bonus => ({ mains: numbers, bonus: bonus }))
-                ).map(winningNumbers =>
-                  new WinningNumbers(
-                      round,
-                      new Game(PicksCons(winningNumbers.mains.map(n => PickedNumberCons(n)))),
-                      PickedNumberCons(winningNumbers.bonus)
-                  )
+                       .map(bonus => ({
+                          game: new Game(PicksCons(numbers.map(n => PickedNumberCons(n)))),
+                          bonus: PickedNumberCons(bonus)
+                       }))
                 ).getOrThrow()
   }
 }

@@ -26,6 +26,6 @@ export class LottoMachine {
     }
     const tmp = [...this.buffer]
     this.buffer.length = 0
-    return new Ticket((await this.winningNumbersRepository.recent()).round, tmp)
+    return new Ticket((await this.winningNumbersRepository.ofRecent()).round, tmp)
   }
 }

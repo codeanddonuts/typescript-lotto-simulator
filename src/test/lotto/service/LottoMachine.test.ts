@@ -11,8 +11,9 @@ let lottoMachineService: LottoMachine
 let recentWinningNumbers: WinningNumbers
 
 beforeAll(async () => {
-  await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
-  recentWinningNumbers = await container.get<WinningNumbersRepository>(WinningNumbersRepository).recent()
+  const connection = await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
+  await connection.createQueryRunner().dropTable("winning_numbers", true)
+  recentWinningNumbers = await container.get<WinningNumbersRepository>(WinningNumbersRepository).ofRecent()
 })
 
 beforeEach(() => {
@@ -25,9 +26,10 @@ afterEach(() => {
 })
 
 afterAll(async () => {
-  await getConnection().close().catch(e => console.log(e))
+  const connection = getConnection()
+  await connection.createQueryRunner().dropTable("winning_numbers", true)
+  await connection.close().catch(e => console.log(e))
 })
-
 
 describe("Printing ticket ...", () => {
   it("Failed: Purchase game(s) first", () => {
