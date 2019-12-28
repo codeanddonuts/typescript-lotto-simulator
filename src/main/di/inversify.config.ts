@@ -2,7 +2,8 @@ import { Container } from "inversify"
 import Router from "koa-router"
 import Controller from "../controller/Controller"
 import { ShopController } from "../controller/ShopController"
-import { WinningNumbersRepository, WinningNumbersCachedWebCrawler } from "../lotto/repository/WinningNumbersRepository"
+import { WinningNumbersCachedWebCrawler } from "../lotto/repository/WinningNumbersCachedWebCrawler"
+import { WinningNumbersRepository } from "../lotto/repository/WinningNumbersRepository.1"
 import { LottoMachine } from "../lotto/service/LottoMachine"
 
 export const container = new Container()

@@ -24,8 +24,12 @@ new class App {
   async connectDatabase() {
     createConnection(
         Object.assign(
-            await getConnectionOptions(),
-            { entities: [ "./lotto/repository/**/*.ts" ] }
+            await getConnectionOptions(), {
+              cache: true,
+              entities: [
+                  "./lotto/repository/**/*.ts"
+              ]
+            }
         )
     )
   }

@@ -1,6 +1,6 @@
 import { Game, SixPicks } from "../domain/Game"
 import { Ticket } from "../domain/Ticket"
-import { WinningNumbersRepository } from "../repository/WinningNumbersRepository"
+import { WinningNumbersRepository } from "../repository/WinningNumbersRepository.1"
 import { injectable, inject } from "inversify"
 import { Money } from "../domain/Money"
 

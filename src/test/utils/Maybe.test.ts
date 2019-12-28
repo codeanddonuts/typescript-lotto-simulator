@@ -14,6 +14,16 @@ describe("Maybe of ...", () => {
   )
 })
 
+describe("Join of ...", () => {
+  it("Maybe<Maybe<Just 11>> = Maybe<Just 11>", () =>
+    expect(Maybe.join(Maybe.cons(new Just(11)))).toEqual(new Just(11))
+  )
+
+  it("Maybe<Maybe<Nothing>> = Maybe<Nothing>", () =>
+    expect(Maybe.join(Maybe.cons(new Nothing()))).toEqual(new Nothing())
+  )
+})
+
 describe("map x -> x * 2 ...", () => {
   it("Just 11 = Just 22", () =>
     expect((new Just(11)).map(x => x * 2)).toEqual(new Just(22))

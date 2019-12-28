@@ -3,6 +3,10 @@ export abstract class Maybe<a> {
     return (val === null || val === undefined) ? new Nothing() : new Just(val)
   }
 
+  public static join<a>(val: Maybe<Maybe<a>>): Maybe<a> {
+    return val.bind(x => x)
+  }
+
   protected constructor() {}
 
   abstract map<b>(f: (x: a) => b | null | undefined): Maybe<b>
