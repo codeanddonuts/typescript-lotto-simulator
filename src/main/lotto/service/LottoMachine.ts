@@ -1,6 +1,6 @@
-import { Game, SixPicks } from "../domain/Game"
+import { Game, Picks } from "../domain/Game"
 import { Ticket } from "../domain/Ticket"
-import { WinningNumbersRepository } from "../repository/WinningNumbersRepository.1"
+import { WinningNumbersRepository } from "../repository/WinningNumbersRepository"
 import { injectable, inject } from "inversify"
 import { Money } from "../domain/Money"
 
@@ -12,7 +12,7 @@ export class LottoMachine {
 
   constructor(@inject(WinningNumbersRepository) private readonly winningNumbersRepository: WinningNumbersRepository) {}
 
-  public issueManually(sixPicks: SixPicks): void | never {
+  public issueManually(sixPicks: Picks): void | never {
     this.buffer.push(new Game(sixPicks))
   }
 

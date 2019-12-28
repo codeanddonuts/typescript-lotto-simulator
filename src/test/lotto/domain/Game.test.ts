@@ -1,35 +1,89 @@
-import { Game, SixPicksCons } from "../../../main/lotto/domain/Game"
+import * as fc from "fast-check"
+import { Game, PicksCons, PICK_RANGE, PickedNumberCons, NUMBER_OF_PICKS } from "../../../main/lotto/domain/Game"
 
-describe("Are six numbers?", () => {
+describe("Picked numbers are in range of 1 ~ 45", () => {
   it("Yes", () =>
-    expect(SixPicksCons([1, 2, 3, 4, 5, 6])).toEqual([1, 2, 3, 4, 5, 6])
+    fc.assert(
+        fc.property(
+            fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX),
+            n => expect(PickedNumberCons(n)).toEqual(n)
+        )
+    )
   )
 
   it("No: Underflow", () =>
-    expect(() => SixPicksCons([1, 2, 3, 4, 5])).toThrow()
+    fc.assert(
+        fc.property(
+            fc.integer(Number.MIN_SAFE_INTEGER, PICK_RANGE.MIN - 1),
+            n => expect(() => PickedNumberCons(n)).toThrow()
+        )
+    )
   )
 
   it("No: Overflow", () =>
-    expect(() => SixPicksCons([1, 2, 3, 4, 5, 6, 7])).toThrow()
+    fc.assert(
+        fc.property(
+            fc.integer(PICK_RANGE.MAX + 1, Number.MAX_SAFE_INTEGER),
+            n => expect(() => PickedNumberCons(n)).toThrow()
+        )
+    )
   )
 })
 
-describe("Numbers of matches are?", () => {
-  it("0", () =>
-    expect(new Game([1, 2, 3, 4, 5, 6]).numberOfMatchesTo(new Game([7, 8, 9, 10, 11, 12]))).toBe(0)
+describe("Are six numbers?", () => {
+  it("Yes", () =>
+    fc.assert(
+        fc.property(
+            fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
+            arr => expect(PicksCons(arr.map(n => PickedNumberCons(n)))).toEqual(arr)
+        )
+    )
   )
 
-  it("6", () =>
-    expect(new Game([1, 2, 3, 4, 5, 6]).numberOfMatchesTo(new Game([1, 2, 3, 4, 5, 6]))).toBe(6)
+  it("Yes, but numbers are invalid", () =>
+    fc.assert(
+        fc.property(
+            fc.array(fc.integer(), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
+            arr => expect(() => PicksCons(arr.map(n => PickedNumberCons(n)))).toThrow()
+        )
+    )
+  )
+
+  it("No: Underflow", () =>
+    fc.assert(
+      fc.property(
+          fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS - 1),
+          arr => expect(() => PicksCons(arr.map(n => PickedNumberCons(n)))).toThrow()
+      )
+    )
+  )
+
+  it("No: Underflow", () =>
+    fc.assert(
+      fc.property(
+          fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS + 1, 255),
+          arr => expect(() => PicksCons(arr.map(n => PickedNumberCons(n)))).toThrow()
+      )
+    )
   )
 })
 
-describe("Contains?", () => {
-  it("3: Yes", () =>
-    expect(new Game([1, 2, 3, 4, 5, 6]).contains(3)).toBeTruthy()
+describe("Are numbers all different?", () => {
+  it("Yes", () =>
+    fc.assert(
+        fc.property(
+            fc.set(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
+            set => expect(() => new Game(PicksCons(set.map(n => PickedNumberCons(n))))).not.toThrow()
+        )
+    )
   )
-  
-  it("7: Yes", () =>
-    expect(new Game([1, 2, 3, 4, 5, 6]).contains(7)).toBeFalsy()
+
+  it("No", () =>
+    fc.assert(
+        fc.property(
+            fc.array(fc.integer(), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
+            arr => expect(() => new Game(PicksCons(arr.map(n => PickedNumberCons(n))))).toThrow()
+        )
+    )
   )
 })

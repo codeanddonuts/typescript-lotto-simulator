@@ -1,7 +1,7 @@
 import ValueObject from "../../utils/ValueObject"
 
 export class Round implements ValueObject {
-  private static MIN_ROUND = 1
+  public static MIN_ROUND = 1
 
   constructor(private readonly number: number) {
     if (number < Round.MIN_ROUND) {

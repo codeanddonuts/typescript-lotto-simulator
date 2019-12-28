@@ -1,13 +1,13 @@
 import { Round } from "../domain/Round"
 import { WinningNumbers } from "../domain/WinningNumbers"
-import { Game, PickedNumberCons, SixPicksCons, PickedNumber } from "../domain/Game"
+import { Game, PickedNumberCons, PicksCons, PickedNumber } from "../domain/Game"
 import axios from "axios"
 import { Maybe } from "../../utils/Maybe"
 import { PromiseMaybeTransformer } from "../../utils/MaybeT"
 import * as iconv from "iconv-lite"
 import { injectable } from "inversify"
 import { getConnection, Entity, PrimaryColumn, Column } from "typeorm"
-import { WinningNumbersRepository } from "./WinningNumbersRepository.1"
+import { WinningNumbersRepository } from "./WinningNumbersRepository"
 
 @injectable()
 export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository {
@@ -41,7 +41,7 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
     return PromiseMaybeTransformer.fromNullable(this.cache.findOne({ where: { round: round.val }, cache: true }))
                                   .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
                                   .getOrElse(async () => {
-                                    const winningNumbers = this.parseHtml(round, responseBody ?? await this.requestFromWeb())
+                                    const winningNumbers = this.parseHtml(round, responseBody ?? await this.requestFromWeb(round))
                                     this.cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
                                     return winningNumbers
                                   })
@@ -63,7 +63,7 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
                 ).map(winningNumbers =>
                   new WinningNumbers(
                       round,
-                      new Game(SixPicksCons(winningNumbers.mains.map(n => PickedNumberCons(n)))),
+                      new Game(PicksCons(winningNumbers.mains.map(n => PickedNumberCons(n)))),
                       PickedNumberCons(winningNumbers.bonus)
                   )
                 ).getOrThrow()

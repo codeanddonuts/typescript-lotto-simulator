@@ -3,15 +3,15 @@ import { Game } from "../../../main/lotto/domain/Game"
 import { LottoMachine } from "../../../main/lotto/service/LottoMachine"
 import { Ticket } from "../../../main/lotto/domain/Ticket"
 import { container } from "../../../main/di/Inversify.config"
-import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository.1"
+import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
-import { createConnection, getConnection } from "typeorm"
+import { createConnection, getConnection, getConnectionOptions } from "typeorm"
 
 let lottoMachineService: LottoMachine
 let recentWinningNumbers: WinningNumbers
 
 beforeAll(async () => {
-  await createConnection()
+  await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
   recentWinningNumbers = await container.get<WinningNumbersRepository>(WinningNumbersRepository).recent()
 })
 

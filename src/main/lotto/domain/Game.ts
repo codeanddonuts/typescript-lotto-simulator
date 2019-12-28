@@ -1,6 +1,6 @@
 import ContainerUtils from "../../utils/ContainerUtils"
 
-const enum PICK_RANGE {
+export const enum PICK_RANGE {
   MIN = 1,
   MAX = 45
 }
@@ -20,17 +20,17 @@ export const PickedNumberCons = (n: number): PickedNumber | never => {
 
 export const NUMBER_OF_PICKS = 6
 
-type IndexOfPick = 1 | 2 | 3 | 4 | 5 | 6
+type IndicesOfPicks = 1 | 2 | 3 | 4 | 5 | 6
 
-export type NumberOfMatches = 0 | 1 | 2 | 3 | 4 | 5 | 6
+export type NumberOfMatches = 0 | IndicesOfPicks
 
 type ArrayOfSixElements<T> = [T, T, T, T, T, T]
 
-export type SixPicks = ArrayOfSixElements<PickedNumber>
+export type Picks = ArrayOfSixElements<PickedNumber>
 
-export const SixPicksCons = (pickedNumbers: PickedNumber[]): SixPicks | never => {
+export const PicksCons = (pickedNumbers: PickedNumber[]): Picks | never => {
   if (pickedNumbers.length === NUMBER_OF_PICKS) {
-    return pickedNumbers as SixPicks
+    return pickedNumbers as Picks
   }
   throw new Error("6개의 숫자만을 입력해주시기 바랍니다.")
 }
@@ -42,11 +42,11 @@ export class Game {
   private readonly picks: ReadonlySet<PickedNumber>
 
   public static autoGen(): Game {
-    return new Game(SixPicksCons(ContainerUtils.shuffle(this.BALLS).slice(0, NUMBER_OF_PICKS)))
+    return new Game(PicksCons(ContainerUtils.shuffle(this.BALLS).slice(0, NUMBER_OF_PICKS)))
   }
 
-  public constructor(sixPicks: SixPicks) {
-    if (ContainerUtils.hasDistinctElements(sixPicks)) {
+  public constructor(sixPicks: Picks) {
+    if (ContainerUtils.hasOnlyDistinctElements(sixPicks)) {
       this.picks = new Set(sixPicks.sort((a, b) => a - b))
     } else {
       throw new Error("각기 다른 번호를 입력해주세요.")
@@ -61,7 +61,7 @@ export class Game {
     return this.picks.has(n)
   }
 
-  public getNthPick(i: IndexOfPick): PickedNumber {
+  public getNthPick(i: IndicesOfPicks): PickedNumber {
     return [...this.picks.values()][i - 1]
   }
 }

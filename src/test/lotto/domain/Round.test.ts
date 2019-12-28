@@ -1,4 +1,5 @@
 import { Round } from "../../../main/lotto/domain/Round"
+import fc from "fast-check"
 
 describe("Are valid rounds?", () => {
   it("Yes", () =>
@@ -6,11 +7,9 @@ describe("Are valid rounds?", () => {
   )
 
   it("No: Underflow", () =>
-    expect(() => new Round(0)).toThrow()
-  )
-
-  it("No: Underflow", () =>
-    expect(() => new Round(-125)).toThrow()
+    fc.assert(
+        fc.property(fc.integer(Round.MIN_ROUND - 1), n => expect(() => new Round(n)).toThrow())
+    )
   )
 })
 

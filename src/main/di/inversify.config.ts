@@ -3,7 +3,7 @@ import Router from "koa-router"
 import Controller from "../controller/Controller"
 import { ShopController } from "../controller/ShopController"
 import { WinningNumbersCachedWebCrawler } from "../lotto/repository/WinningNumbersCachedWebCrawler"
-import { WinningNumbersRepository } from "../lotto/repository/WinningNumbersRepository.1"
+import { WinningNumbersRepository } from "../lotto/repository/WinningNumbersRepository"
 import { LottoMachine } from "../lotto/service/LottoMachine"
 
 export const container = new Container()

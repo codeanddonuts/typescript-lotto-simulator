@@ -1,10 +1,16 @@
 export default class ContainerUtils {
   public static intRange(begin: number, end: number): number[] {
-    return Array.from(Array(end - begin).keys()).map(n => n + begin)
+    if (begin <= end) {
+      return Array.from(Array(end - begin).keys()).map(n => n + begin)
+    }
+    return this.intRangeClosed(begin - 1, end)
   }
 
   public static intRangeClosed(begin: number, end: number): number[] {
-    return this.intRange(begin, end + 1)
+    if (begin <= end) {
+      return this.intRange(begin, end + 1)
+    }
+    return Array.from(Array(begin - end + 1).keys()).map(n => n + end).reverse()
   }
 
   public static shuffle<T>(arr: T[]): T[] {
@@ -18,7 +24,7 @@ export default class ContainerUtils {
     return arr
   }
 
-  public static hasDistinctElements<T>(arr: Readonly<T[]>): boolean {
+  public static hasOnlyDistinctElements<T>(arr: Readonly<T[]>): boolean {
     return arr.length === (new Set(arr)).size
   }
 

@@ -5,18 +5,30 @@ describe("Range of ...", () => {
     expect(ContainerUtils.intRange(6, 11)).toEqual([6, 7, 8, 9, 10])
   )
 
+  it("11 > x >= 6", () =>
+    expect(ContainerUtils.intRange(11, 6)).toEqual([10, 9, 8, 7, 6])
+  )
+
   it("19 <= x <= 21", () =>
     expect(ContainerUtils.intRangeClosed(19, 21)).toEqual([19, 20, 21])
+  )
+
+  it("21 >= x >= 19", () =>
+    expect(ContainerUtils.intRangeClosed(21, 19)).toEqual([21, 20, 19])
+  )
+
+  it("7 < x < 7", () =>
+    expect(ContainerUtils.intRange(7, 7)).toEqual([])
   )
 })
 
 describe("Has distinct elements?", () => {
   it("Yes", () =>
-    expect(ContainerUtils.hasDistinctElements([3, 6, 11, 1531])).toBeTruthy()
+    expect(ContainerUtils.hasOnlyDistinctElements([3, 6, 11, 1531])).toBeTruthy()
   )
 
   it("No", () =>
-    expect(ContainerUtils.hasDistinctElements([1, 1, 2, 3, 5, 8])).toBeFalsy()
+    expect(ContainerUtils.hasOnlyDistinctElements([1, 1, 2, 3, 5, 8])).toBeFalsy()
   )
 })
 
