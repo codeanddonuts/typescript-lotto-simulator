@@ -12,17 +12,17 @@ export const enum Placement {
   NONE = "꽝"
 }
 
-export class GameResult implements ValueObject {
-  private static readonly RESULTS: Readonly<GameResult[]> = [
-    new GameResult(Placement.FIRST, new Money(2_000_000_000), 6),
-    new GameResult(Placement.SECOND, new Money(30_000_000), 5, true),
-    new GameResult(Placement.THIRD, new Money(1_500_000), 5, false),
-    new GameResult(Placement.FOURTH, new Money(50_000), 4),
-    new GameResult(Placement.FIFTH, new Money(5_000), 3)
+export class Result implements ValueObject {
+  private static readonly RESULTS: Readonly<Result[]> = [
+    new Result(Placement.FIRST, 2_000_000_000, 6),
+    new Result(Placement.SECOND, 30_000_000, 5, true),
+    new Result(Placement.THIRD, 1_500_000, 5, false),
+    new Result(Placement.FOURTH, 50_000, 4),
+    new Result(Placement.FIFTH, 5_000, 3)
   ].reverse()
-  private static readonly NONE = new GameResult(Placement.NONE, new Money(0))
+  private static readonly NONE = new Result(Placement.NONE, 0)
 
-  public static of(numberOfMatches: NumberOfMatches, containsBonus: boolean): GameResult {
+  public static of(numberOfMatches: NumberOfMatches, containsBonus: boolean): Result {
     return (() => {
       const temp = this.RESULTS.filter(x => x._numberOfMatches === numberOfMatches)
       if (temp.length > 1) {

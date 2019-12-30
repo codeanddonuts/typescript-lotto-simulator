@@ -1,7 +1,7 @@
 (() => {
   class Api {
     async fetchPrice() {
-      return (await axios.get("/api/price")).data.amount
+      return (await axios.get("/api?query={price}")).data.data.price
     }
 
     async requestPurchase() {

@@ -1,9 +1,9 @@
-import "reflect-metadata"
+import { container } from "./di/Inversify.config"
 import Koa from "koa"
 import Router from "koa-router"
 import serve from "koa-static"
+import compress from "koa-compress"
 import Controller from "./controller/Controller"
-import { container } from "./di/Inversify.config"
 import { createConnection, getConnectionOptions } from "typeorm"
 
 const enum HttpStatus {
@@ -17,16 +17,23 @@ new class App {
   private readonly app = new Koa()
 
   constructor(private readonly router: Router, private readonly controllers: Readonly<Controller[]>) {
-    this.connectDatabase().then(ok => {
-      this.router.all("*", ctx => {
-        ctx.status = HttpStatus.NOT_FOUND
-        ctx.redirect("/error.html")
-      })
-      this.app.use(serve(__dirname + App.STATIC_FILES_DIR))
-              .use(this.router.routes())
-              .use(this.router.allowedMethods())
-              .listen(App.PORT)
-    }).catch(e => console.log(e))
+    this.setDefaultRoutings()
+    this.app.use(serve(__dirname + App.STATIC_FILES_DIR))
+            .use(this.router.routes())
+            .use(this.router.allowedMethods())
+            .use(compress)
+            .listen(App.PORT)
+    this.connectDatabase()
+  }
+
+  setDefaultRoutings() {
+    this.router.get("/", ctx => {
+      ctx.redirect("/index.html")
+    })
+    this.router.all("*", ctx => {
+      ctx.status = HttpStatus.NOT_FOUND
+      ctx.redirect("/error.html")
+    })
   }
 
   async connectDatabase(): Promise<void> {

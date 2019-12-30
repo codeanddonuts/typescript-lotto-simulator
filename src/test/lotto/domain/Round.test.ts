@@ -1,5 +1,5 @@
-import { Round } from "../../../main/lotto/domain/Round"
 import fc from "fast-check"
+import { Round } from "../../../main/lotto/domain/Round"
 
 describe("Are valid rounds?", () => {
   it("Yes", () =>

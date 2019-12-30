@@ -1,6 +1,6 @@
 import { Round } from "../domain/Round"
 import { WinningNumbers } from "../domain/WinningNumbers"
-import { Game, PickedNumberCons, PicksCons, PickedNumber } from "../domain/Game"
+import { Game, PickedNumberCons, PickGroupCons, PickedNumber } from "../domain/Game"
 import axios from "axios"
 import { Maybe } from "../../utils/Maybe"
 import { PromiseMaybeTransformer } from "../../utils/MaybeT"
@@ -61,7 +61,7 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
                 .bind(numbers =>
                   Maybe.cons(numbers.pop())
                        .map(bonus => ({
-                          game: new Game(PicksCons(numbers.map(n => PickedNumberCons(n)))),
+                          game: new Game(PickGroupCons(numbers.map(n => PickedNumberCons(n)))),
                           bonus: PickedNumberCons(bonus)
                        }))
                 ).getOrThrow()

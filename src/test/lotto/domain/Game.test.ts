@@ -1,5 +1,5 @@
-import * as fc from "fast-check"
-import { Game, PicksCons, PICK_RANGE, PickedNumberCons, NUMBER_OF_PICKS } from "../../../main/lotto/domain/Game"
+import fc from "fast-check"
+import { Game, PickGroupCons, PICK_RANGE, PickedNumberCons, NUMBER_OF_PICKS } from "../../../main/lotto/domain/Game"
 
 describe("Picked numbers are in range of 1 ~ 45", () => {
   it("Yes", () =>
@@ -35,7 +35,7 @@ describe("Are six numbers?", () => {
     fc.assert(
         fc.property(
             fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
-            arr => expect(PicksCons(arr.map(n => PickedNumberCons(n)))).toEqual(arr)
+            arr => expect(PickGroupCons(arr.map(n => PickedNumberCons(n)))).toEqual(arr)
         )
     )
   )
@@ -44,7 +44,7 @@ describe("Are six numbers?", () => {
     fc.assert(
         fc.property(
             fc.array(fc.integer(), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
-            arr => expect(() => PicksCons(arr.map(n => PickedNumberCons(n)))).toThrow()
+            arr => expect(() => PickGroupCons(arr.map(n => PickedNumberCons(n)))).toThrow()
         )
     )
   )
@@ -53,7 +53,7 @@ describe("Are six numbers?", () => {
     fc.assert(
       fc.property(
           fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS - 1),
-          arr => expect(() => PicksCons(arr.map(n => PickedNumberCons(n)))).toThrow()
+          arr => expect(() => PickGroupCons(arr.map(n => PickedNumberCons(n)))).toThrow()
       )
     )
   )
@@ -62,7 +62,7 @@ describe("Are six numbers?", () => {
     fc.assert(
       fc.property(
           fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS + 1, 255),
-          arr => expect(() => PicksCons(arr.map(n => PickedNumberCons(n)))).toThrow()
+          arr => expect(() => PickGroupCons(arr.map(n => PickedNumberCons(n)))).toThrow()
       )
     )
   )
@@ -73,7 +73,7 @@ describe("Are numbers all different?", () => {
     fc.assert(
         fc.property(
             fc.set(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
-            set => expect(() => new Game(PicksCons(set.map(n => PickedNumberCons(n))))).not.toThrow()
+            set => expect(() => new Game(PickGroupCons(set.map(n => PickedNumberCons(n))))).not.toThrow()
         )
     )
   )
@@ -82,7 +82,7 @@ describe("Are numbers all different?", () => {
     fc.assert(
         fc.property(
             fc.array(fc.integer(), NUMBER_OF_PICKS, NUMBER_OF_PICKS),
-            arr => expect(() => new Game(PicksCons(arr.map(n => PickedNumberCons(n))))).toThrow()
+            arr => expect(() => new Game(PickGroupCons(arr.map(n => PickedNumberCons(n))))).toThrow()
         )
     )
   )

@@ -26,11 +26,11 @@ export type NumberOfMatches = 0 | IndicesOfPicks
 
 type ArrayOfSixElements<T> = [T, T, T, T, T, T]
 
-export type Picks = ArrayOfSixElements<PickedNumber>
+export type PickGroup = ArrayOfSixElements<PickedNumber>
 
-export const PicksCons = (pickedNumbers: PickedNumber[]): Picks | never => {
+export const PickGroupCons = (pickedNumbers: PickedNumber[]): PickGroup | never => {
   if (pickedNumbers.length === NUMBER_OF_PICKS) {
-    return pickedNumbers as Picks
+    return pickedNumbers as PickGroup
   }
   throw new Error("6개의 숫자만을 입력해주시기 바랍니다.")
 }
@@ -42,12 +42,12 @@ export class Game {
   private readonly picks: ReadonlySet<PickedNumber>
 
   public static autoGen(): Game {
-    return new Game(PicksCons(ContainerUtils.shuffle(this.BALLS).slice(0, NUMBER_OF_PICKS)))
+    return new Game(PickGroupCons(ContainerUtils.shuffle(this.BALLS).slice(0, NUMBER_OF_PICKS)))
   }
 
-  public constructor(sixPicks: Picks) {
-    if (ContainerUtils.hasOnlyDistinctElements(sixPicks)) {
-      this.picks = new Set(sixPicks.sort((a, b) => a - b))
+  constructor(pickGroup: PickGroup) {
+    if (ContainerUtils.hasOnlyDistinctElements(pickGroup)) {
+      this.picks = new Set(pickGroup.sort((a, b) => a - b))
     } else {
       throw new Error("각기 다른 번호를 입력해주세요.")
     }

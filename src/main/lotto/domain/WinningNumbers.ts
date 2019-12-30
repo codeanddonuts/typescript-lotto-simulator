@@ -3,7 +3,7 @@ import { Round } from "./Round"
 import { Game, PickedNumber } from "./Game"
 
 export class WinningNumbers implements ValueObject {
-  public constructor(private readonly _round: Round, private readonly _mains: Game, private readonly _bonus: PickedNumber) {}
+  constructor(private readonly _round: Round, private readonly _mains: Game, private readonly _bonus: PickedNumber) {}
 
   get round() {
     return this._round

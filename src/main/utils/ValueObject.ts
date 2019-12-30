@@ -19,7 +19,8 @@ export class ValueObjectKeyMap<K extends ValueObject, V> implements Map<K, V> {
   }
 
   public forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
-      (new Map([...this.map.values()])).forEach(callbackfn, thisArg)
+    (new Map([...this.map.values()])).forEach(callbackfn, thisArg)
+      
   }
 
   public get(key: K): V | undefined {

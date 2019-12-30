@@ -1,17 +1,16 @@
+import { container } from "../../../main/di/Inversify.config"
 import { Round } from "../../../main/lotto/domain/Round"
 import { Game } from "../../../main/lotto/domain/Game"
-import moment from "moment"
 import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
 import { createConnection, getConnection, getConnectionOptions } from "typeorm"
-import { container } from "../../../main/di/Inversify.config"
-import { WinningNumbersEntityAdapter } from "../../../main/lotto/repository/WinningNumbersCachedWebCrawler"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
+import { WinningNumbersEntityAdapter } from "../../../main/lotto/repository/WinningNumbersCachedWebCrawler"
+import { APPROXIMATE_RECENT_ROUND } from "../RecentRound"
 
 let winningNumbersRepository: WinningNumbersRepository
 
 beforeAll(async () => {
-  const connection = await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
-  await connection.createQueryRunner().dropTable("winning_numbers", true)
+  await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
 })
 
 beforeEach(async () => {
@@ -24,9 +23,7 @@ afterEach(async () => {
 })
 
 afterAll(async () => {
-  const connection = getConnection()
-  await connection.createQueryRunner().dropTable("winning_numbers", true)
-  await connection.close().catch(e => console.log(e))
+  await getConnection().close().catch(e => console.log(e))
 })
 
 describe("The winner of round n is ...", () => {
@@ -53,12 +50,11 @@ describe("The winner of round n is ...", () => {
 })
 
 describe("The winner of the recent round is equal to round n?", () => {
-  const RECENT_ROUND = 889 + moment(Date.now()).diff(moment("2019-12-14T12:00:00Z"), "weeks")
-  it(`${RECENT_ROUND}`, async () => {
+  it(`Yes: ${APPROXIMATE_RECENT_ROUND}`, async () => {
     expect(
         await winningNumbersRepository.ofRecent()
     ).toEqual(
-        await winningNumbersRepository.of(new Round(RECENT_ROUND))
+        await winningNumbersRepository.of(APPROXIMATE_RECENT_ROUND)
     )
   })
 })

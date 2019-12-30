@@ -17,9 +17,18 @@ describe("Range of ...", () => {
     expect(ContainerUtils.intRangeClosed(21, 19)).toEqual([21, 20, 19])
   )
 
-  it("7 < x < 7", () =>
+  it("7 <= x < 7", () =>
     expect(ContainerUtils.intRange(7, 7)).toEqual([])
   )
+
+  it("7 <= x <= 7", () =>
+    expect(ContainerUtils.intRangeClosed(7, 7)).toEqual([7])
+  )
+
+  it("7.2 <= x < 11.2?", () =>
+    expect(() => ContainerUtils.intRangeClosed(7.2, 11.7)).toThrow()
+  )
+
 })
 
 describe("Has distinct elements?", () => {
