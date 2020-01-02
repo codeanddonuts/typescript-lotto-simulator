@@ -36,10 +36,10 @@ export class Result implements ValueObject {
   private readonly _hashCode: number
 
   private constructor(
-    private readonly _placement: Placement,
-    private readonly _prize: Money,
-    private readonly _numberOfMatches?: NumberOfMatches,
-    private readonly _containsBonus?: boolean
+      private readonly _placement: Placement,
+      private readonly _prize: Money,
+      private readonly _numberOfMatches?: NumberOfMatches,
+      private readonly _containsBonus?: boolean
   ) {
     this._hashCode = hash(_placement)
   }

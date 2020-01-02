@@ -14,8 +14,6 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
   private static readonly FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
   private static readonly ROUND_ATTR = "&drwNo="
 
-  private readonly cache = getConnection().getRepository(WinningNumbersEntity)
-
   public async of(round: Round): Promise<WinningNumbers> | never {
     try {
       return this.retrieveFromCacheOrParseNew(round)
@@ -29,7 +27,7 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
     try {
       const responseBody = await this.requestFromWeb()
       return Maybe.cons(responseBody.match(/<option value="\d+"  >/)?.shift())
-                  .map(str => new Round(parseInt(str.substring(15, str.indexOf("  >")))))
+                  .map(str => new Round(parseInt(str.substring(15, str.indexOf("  >")), 10)))
                   .map(round => this.retrieveFromCacheOrParseNew(round, responseBody))
                   .getOrThrow()
     } catch (e) {
@@ -46,18 +44,19 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
   }
 
   private async retrieveFromCacheOrParseNew(round: Round, responseBody?: string): Promise<WinningNumbers> | never {
-    return PromiseMaybeTransformer.fromNullable(this.cache.findOne({ where: { round: round.val }, cache: true }))
+    const cache = getConnection().getRepository(WinningNumbersEntity)
+    return PromiseMaybeTransformer.fromNullable(cache.findOne({ where: { round: round.val }, cache: true }))
                                   .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
                                   .getOrElse(async () => {
                                     const numbers = this.parseHtml(responseBody ?? await this.requestFromWeb(round))
                                     const winningNumbers = new WinningNumbers(round, numbers.game, numbers.bonus)
-                                    this.cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
+                                    cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
                                     return winningNumbers
                                   })
   }
 
   private parseHtml(responseBody: string): { game: Game, bonus: PickedNumber } | never {
-    return Maybe.cons(responseBody.match(/>\d+<\/span>/g)?.map(x => parseInt(x.substring(1, x.indexOf("</span>")))))
+    return Maybe.cons(responseBody.match(/>\d+<\/span>/g)?.map(x => parseInt(x.substring(1, x.indexOf("</span>")), 10)))
                 .bind(numbers =>
                   Maybe.cons(numbers.pop())
                        .map(bonus => ({

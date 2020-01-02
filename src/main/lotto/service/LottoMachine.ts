@@ -8,7 +8,7 @@ import ContainerUtils from "../../utils/ContainerUtils"
 @injectable()
 export class LottoMachine {
   public static PRICE_PER_GAME: Money = 1_000
-  public static MAX_AMOUNT_OF_PURCHASE = 100
+  public static MAX_PURCHASE_AMOUNT = 100
 
   constructor(@inject(WinningNumbersRepository) private readonly winningNumbersRepository: WinningNumbersRepository) {}
 

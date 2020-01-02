@@ -16,11 +16,11 @@ describe("Total prize is ...", () => {
 
   it("0", () => {
     const ticket = new Ticket(new Round(889), [new Game([1, 2, 3, 4, 5, 6]), new Game([1, 2, 3, 4, 5, 6])])
-    expect(ticket.matchResult(winningNumbers).totalPrize).toEqual(0)
+    expect((<any>ticket.matchResult(winningNumbers)).totalPrize).toEqual(0)
   })
   
   it("30,005,000", () => {
     const ticket = new Ticket(new Round(889), [new Game([3, 13, 29, 38, 39, 26]), new Game([3, 13, 29, 30, 31, 32])])
-    expect(ticket.matchResult(winningNumbers).totalPrize).toEqual(30_005_000)
+    expect((<any>ticket.matchResult(winningNumbers)).totalPrize).toEqual(30_005_000)
   })
 })

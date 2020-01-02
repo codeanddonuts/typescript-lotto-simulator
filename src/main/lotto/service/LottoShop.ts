@@ -12,7 +12,7 @@ export class LottoShop {
     if (investment < LottoMachine.PRICE_PER_GAME) {
       throw new Error("지불 금액이 부족합니다.")
     }
-    const totalPurchaseAmount = Math.min(Math.floor(investment / LottoMachine.PRICE_PER_GAME), LottoMachine.MAX_AMOUNT_OF_PURCHASE)
+    const totalPurchaseAmount = Math.min(Math.floor(investment / LottoMachine.PRICE_PER_GAME), LottoMachine.MAX_PURCHASE_AMOUNT)
     const manualAmount = Math.min(manualPicks.length, totalPurchaseAmount)
     const autoAmount = totalPurchaseAmount - manualAmount
     return this.lottoMachine.issue(manualPicks.slice(0, manualAmount), autoAmount)
