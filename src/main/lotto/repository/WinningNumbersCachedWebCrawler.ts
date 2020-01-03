@@ -1,27 +1,19 @@
 import { Round } from "../domain/Round"
 import { WinningNumbers } from "../domain/WinningNumbers"
-import { Game, PickedNumberCons, PickGroupCons, PickedNumber } from "../domain/Game"
-import axios from "axios"
-import { Maybe } from "../../utils/Maybe"
-import { PromiseMaybeTransformer } from "../../utils/MaybeT"
-import * as iconv from "iconv-lite"
+import { Game, PickedNumber } from "../domain/Game"
+import { PromiseMaybeT } from "../../utils/MaybeT"
 import { injectable } from "inversify"
 import { getConnection, Entity, PrimaryColumn, Column } from "typeorm"
-import { WinningNumbersRepository } from "./WinningNumbersRepository"
 import { Money } from "../domain/Money"
 import { Tiers } from "../domain/Tier"
-
-const FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
-const FETCH_URL_ROUND_ATTR = "&drwNo="
-const NUMBERS_PATTERN = />\d+<\/span>/g
-const PRIZES_PATTERN = /<strong>[\d|,]+ 원<\/strong>/g
-const RECENT_ROUND_PATTERN = /<option value="\d+"  >/
+import { WinningNumbersWebCrawler } from "./WinningNumbersWebCrawler"
+import { Maybe } from "../../utils/Maybe"
 
 @injectable()
-export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository {
-  async of(round: Round): Promise<WinningNumbers> | never {
+export class WinningNumbersCachedWebCrawler extends WinningNumbersWebCrawler {
+  public async of(round: Round): Promise<WinningNumbers> | never {
     try {
-      return this.retrieveFromCacheOrParseNew(round)
+      return (await this.retrieveFromCacheOrParseNew(round)).getOrThrow()
     } catch (e) {
       if (e.isAxiosError) {
         throw new Error(`${round}회차의 당첨 번호를 가져오는 데에 실패하였습니다.`)
@@ -32,11 +24,11 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
 
   public async ofRecent(): Promise<WinningNumbers> | never {
     try {
-      const responseBody = await this.requestFromWeb()
-      return Maybe.cons(responseBody.match(RECENT_ROUND_PATTERN)?.shift())
-                  .map(str => new Round(parseInt(str.substring(15), 10)))
-                  .map(round => this.retrieveFromCacheOrParseNew(round, responseBody))
-                  .getOrThrow()
+      return PromiseMaybeT.cons(super.requestFromWeb()).bind(response =>
+        PromiseMaybeT.liftMaybe(super.parseRecentRound(response)).bind(round =>
+          PromiseMaybeT.cons(this.retrieveFromCacheOrParseNew(round, response))
+        )
+      ).run().then(x => x.getOrThrow())
     } catch (e) {
       if (e.isAxiosError) {
         throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
@@ -45,39 +37,22 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
     }
   }
 
-  private async requestFromWeb(round?: Round): Promise<string> | never {
-    const url = FETCH_URL + (round ? (FETCH_URL_ROUND_ATTR + round) : "")
-    return iconv.decode(
-      (await axios.get(url, { responseType: "arraybuffer" })).data,
-      "euc-kr"
-    ).toString()
-  }
-
-  private async retrieveFromCacheOrParseNew(round: Round, responseBody?: string): Promise<WinningNumbers> | never {
+  private async retrieveFromCacheOrParseNew(round: Round, response?: string): Promise<Maybe<WinningNumbers>> {
     const cache = getConnection().getRepository(WinningNumbersEntity)
-    return PromiseMaybeTransformer.fromNullable(cache.findOne({ where: { round: round.num }, cache: true }))
-                                  .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
-                                  .getOrElse(async () => {
-                                    const numbers = this.parseHtml(responseBody ?? await this.requestFromWeb(round))
-                                    const winningNumbers = new WinningNumbers(round, numbers.game, numbers.bonus, numbers.prizes)
-                                    cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
-                                    return winningNumbers
-                                  })
-  }
-
-  private parseHtml(responseBody: string): { game: Game, bonus: PickedNumber, prizes: Money[] } | never {
-    return Maybe.cons(responseBody.match(NUMBERS_PATTERN)?.map(str => parseInt(str.substring(1), 10)))
-                .bind(numbers =>
-                  Maybe.cons(numbers.pop())
-                       .bind(bonus =>
-                    Maybe.cons(responseBody.match(PRIZES_PATTERN)?.map(str => parseInt(str.replace(/\,/g, "").substring(8), 10)))
-                         .map(prizes => ({
-                            game: new Game(PickGroupCons(numbers.map(n => PickedNumberCons(n)))),
-                            bonus: PickedNumberCons(bonus),
-                            prizes: prizes as Money[]
-                          }))
-                    )
-                ).getOrThrow()
+    return PromiseMaybeT.liftPromise(cache.findOne({ where: { round: round.num }, cache: true }))
+                        .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
+                        .orElse(() =>
+           PromiseMaybeT.lift(response)
+                        .orElse(() => PromiseMaybeT.cons(super.requestFromWeb(round)))
+                        .bind(response =>
+                          PromiseMaybeT.liftMaybe(super.parseWinningNumbersAndPrizes(response)
+                                       .map(result => {
+                                          const winningNumbers = new WinningNumbers(round, result.game, result.bonus, result.prizes)
+                                          cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
+                                          return winningNumbers
+                                       })
+                        ))
+    ).run()
   }
 }
 

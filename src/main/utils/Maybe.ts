@@ -12,6 +12,7 @@ export abstract class Maybe<a> {
   abstract map<b>(f: (x: a) => b | null | undefined): Maybe<b>
   abstract bind<b>(f: (x: a) => Maybe<b>): Maybe<b>
   abstract filter(f: (x: a) => boolean): Maybe<a>
+  abstract orElse(m: () => Maybe<a>): Maybe<a>
   abstract getOrElse(defaultValue: () => a): a
   abstract getOrThrow(e?: Error): a | never
 }
@@ -31,6 +32,10 @@ export class Just<a> extends Maybe<a> {
 
   public filter(f: (x: a) => boolean): Maybe<a> {
     return f(this.val) ? this : new Nothing()
+  }
+
+  public orElse(m: () => Maybe<a>): Maybe<a> {
+    return this
   }
 
   public getOrElse(defaultValue: () => a): a {
@@ -57,6 +62,10 @@ export class Nothing<a> extends Maybe<a> {
 
   public filter(f: (x: a) => boolean): Maybe<a> {
     return this
+  }
+
+  public orElse(m: () => Maybe<a>): Maybe<a> {
+    return m()
   }
 
   public getOrElse(defaultValue: () => a): a {

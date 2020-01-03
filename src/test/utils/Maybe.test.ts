@@ -58,6 +58,16 @@ describe("filter x -> x > 2 ...", () => {
   )
 })
 
+describe("... or Just 7", () => {
+  it("Just 11 = Just 11", () =>
+    expect((new Just(11)).orElse(() => new Just(7))).toEqual(new Just(11))
+  )
+
+  it("Nothing = Just 7", () =>
+    expect((new Nothing()).orElse(() => new Just(7))).toEqual(new Just(7))
+  )
+})
+
 describe("get ... or 7", () => {
   it("Just 11 = 11", () =>
     expect((new Just(11)).getOrElse(() => 7)).toEqual(11)
