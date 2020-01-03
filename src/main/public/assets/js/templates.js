@@ -1,5 +1,5 @@
 export class Templates {
-  bakeFrontPage(price, maxPurchaseAmount) {
+  bakeFrontPage(price, maxPurchaseAmount, recentRound) {
     const formattedPrice = new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW" }).format(price)
     return `
       <div id="front-page" class="inner">
@@ -9,8 +9,8 @@ export class Templates {
         </header>
         <section>
           <div class="content">
-            투자금 : <input id="investment" type="text" name="investment" value="0" />
-            <form id="purchase">
+          <form id="purchase">
+              투자금 : <input id="investment" type="text" value="0" />
               <br />
               <div class="right">
                 수동 번호 입력 :
@@ -27,6 +27,10 @@ export class Templates {
               <br />
               <div class="right" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 10px; grid-auto-rows: minmax(100px, auto);">
                 <div style="grid-column: 3;">
+                  <select id="round">
+                    <option value="${recentRound}" selected>${recentRound} 회</option>
+                  </select>
+                  <br />
                   <input id="submit-purchase" type="button" value="구매하기" />
                 </div>
               </div>
@@ -35,6 +39,12 @@ export class Templates {
         </section>
       </div>
     `
+  }
+
+  bakeRoundOptions(recentRound) {
+    return Array.from(Array(recentRound - 1).keys()).reverse()
+                                                    .map(i => `<option value="${i + 1}">${i + 1} 회</option>`)
+                                                    .reduce((a, b) => a + b, "")
   }
 
   bakeResultPage(result) {

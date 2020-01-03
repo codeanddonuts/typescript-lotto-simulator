@@ -2,26 +2,39 @@ import { NUMBER_OF_PICKS } from "./app.js"
 import { Templates } from "./templates.js"
 
 export class View {
-  constructor(price, maxPurchaseAmount, investmentValidator, result) {
+  constructor(price, maxPurchaseAmount, recentRound, investment, result) {
     this.templates = new Templates()
     this.price = price
     this.maxPurchaseAmount = maxPurchaseAmount
-    investmentValidator.subscribe(x => this.resetInvestmentAmount(x))
-    result.subscribe(x => this.renderResult(x))
+    this.recentRound = recentRound
     this.initView()
+    this.dispatchHandlers(investment, result)
   }
 
   initView() {
     document.getElementsByTagName("main")[0].insertAdjacentHTML(
         "afterbegin",
-        this.templates.bakeFrontPage(this.price, this.maxPurchaseAmount)
+        this.templates.bakeFrontPage(this.price, this.maxPurchaseAmount, this.recentRound)
     )
+    document.getElementById("round").insertAdjacentHTML("beforeend", this.templates.bakeRoundOptions(this.recentRound))
     this.maxManualInputs = 0
     this.numberOfManualInputs = 0
-    rxjs.fromEvent(document.getElementById("add-manual-inputs"), "click")
-        .subscribe(() => this.addManualInputs())
-    rxjs.fromEvent(document.getElementById("remove-manual-inputs"), "click")
-        .subscribe(() => this.removeManualInputs())
+  }
+
+  dispatchHandlers(investment, result) {
+    investment.subscribe(x => this.resetInvestmentAmount(x))
+    result.subscribe(x => this.renderResult(x))
+    rxjs.fromEvent(document, "click")
+        .subscribe(event => {
+          switch (event.target.id) {
+            case "add-manual-inputs":
+              return this.addManualInputs()
+            case "remove-manual-inputs":
+              return this.removeManualInputs()
+            case "replay":
+              return this.resetView()
+          }
+        })
   }
 
   resetInvestmentAmount(validatedInvestment) {
@@ -63,8 +76,6 @@ export class View {
     const view = this.templates.bakeResultPage(result)
     document.getElementById("front-page").outerHTML = ""
     document.getElementsByTagName("main")[0].insertAdjacentHTML("beforeend", view)
-    rxjs.fromEvent(document.getElementById("replay"), "click")
-        .subscribe(() => this.resetView())
   }
 
   resetView() {
