@@ -8,35 +8,45 @@ import * as iconv from "iconv-lite"
 import { injectable } from "inversify"
 import { getConnection, Entity, PrimaryColumn, Column } from "typeorm"
 import { WinningNumbersRepository } from "./WinningNumbersRepository"
+import { Money } from "../domain/Money"
+import { Tiers } from "../domain/Tier"
+
+const FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
+const FETCH_URL_ROUND_ATTR = "&drwNo="
+const NUMBERS_PATTERN = />\d+<\/span>/g
+const PRIZES_PATTERN = /<strong>[\d|,]+ 원<\/strong>/g
+const RECENT_ROUND_PATTERN = /<option value="\d+"  >/
 
 @injectable()
 export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository {
-  private static readonly FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
-  private static readonly ROUND_ATTR = "&drwNo="
-
-  public async of(round: Round): Promise<WinningNumbers> | never {
+  async of(round: Round): Promise<WinningNumbers> | never {
     try {
       return this.retrieveFromCacheOrParseNew(round)
     } catch (e) {
-      console.log(e)
-      throw new Error(`${round}회차의 당첨 번호를 가져오는 데에 실패하였습니다.`)
+      if (e.isAxiosError) {
+        throw new Error(`${round}회차의 당첨 번호를 가져오는 데에 실패하였습니다.`)
+      }
+      throw new Error("서버 점검 중입니다.")
     }
   }
 
   public async ofRecent(): Promise<WinningNumbers> | never {
     try {
       const responseBody = await this.requestFromWeb()
-      return Maybe.cons(responseBody.match(/<option value="\d+"  >/)?.shift())
-                  .map(str => new Round(parseInt(str.substring(15, str.indexOf("  >")), 10)))
+      return Maybe.cons(responseBody.match(RECENT_ROUND_PATTERN)?.shift())
+                  .map(str => new Round(parseInt(str.substring(15), 10)))
                   .map(round => this.retrieveFromCacheOrParseNew(round, responseBody))
                   .getOrThrow()
     } catch (e) {
-      throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
+      if (e.isAxiosError) {
+        throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
+      }
+      throw new Error("서버 점검 중입니다.")
     }
   }
 
   private async requestFromWeb(round?: Round): Promise<string> | never {
-    const url = WinningNumbersCachedWebCrawler.FETCH_URL + (round ? WinningNumbersCachedWebCrawler.ROUND_ATTR + round : "")
+    const url = FETCH_URL + (round ? (FETCH_URL_ROUND_ATTR + round) : "")
     return iconv.decode(
       (await axios.get(url, { responseType: "arraybuffer" })).data,
       "euc-kr"
@@ -45,46 +55,60 @@ export class WinningNumbersCachedWebCrawler implements WinningNumbersRepository 
 
   private async retrieveFromCacheOrParseNew(round: Round, responseBody?: string): Promise<WinningNumbers> | never {
     const cache = getConnection().getRepository(WinningNumbersEntity)
-    return PromiseMaybeTransformer.fromNullable(cache.findOne({ where: { round: round.val }, cache: true }))
+    return PromiseMaybeTransformer.fromNullable(cache.findOne({ where: { round: round.num }, cache: true }))
                                   .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
                                   .getOrElse(async () => {
                                     const numbers = this.parseHtml(responseBody ?? await this.requestFromWeb(round))
-                                    const winningNumbers = new WinningNumbers(round, numbers.game, numbers.bonus)
+                                    const winningNumbers = new WinningNumbers(round, numbers.game, numbers.bonus, numbers.prizes)
                                     cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
                                     return winningNumbers
                                   })
   }
 
-  private parseHtml(responseBody: string): { game: Game, bonus: PickedNumber } | never {
-    return Maybe.cons(responseBody.match(/>\d+<\/span>/g)?.map(x => parseInt(x.substring(1, x.indexOf("</span>")), 10)))
+  private parseHtml(responseBody: string): { game: Game, bonus: PickedNumber, prizes: Money[] } | never {
+    return Maybe.cons(responseBody.match(NUMBERS_PATTERN)?.map(str => parseInt(str.substring(1), 10)))
                 .bind(numbers =>
                   Maybe.cons(numbers.pop())
-                       .map(bonus => ({
-                          game: new Game(PickGroupCons(numbers.map(n => PickedNumberCons(n)))),
-                          bonus: PickedNumberCons(bonus)
-                       }))
+                       .bind(bonus =>
+                    Maybe.cons(responseBody.match(PRIZES_PATTERN)?.map(str => parseInt(str.replace(/\,/g, "").substring(8), 10)))
+                         .map(prizes => ({
+                            game: new Game(PickGroupCons(numbers.map(n => PickedNumberCons(n)))),
+                            bonus: PickedNumberCons(bonus),
+                            prizes: prizes as Money[]
+                          }))
+                    )
                 ).getOrThrow()
   }
 }
 
 @Entity("winning_numbers")
 export class WinningNumbersEntity {
-  @PrimaryColumn()
+  @PrimaryColumn("int")
   round!: number
-  @Column()
-  first!: PickedNumber
-  @Column()
-  second!: PickedNumber
-  @Column()
-  third!: PickedNumber
-  @Column()
-  fourth!: PickedNumber
-  @Column()
-  fifth!: PickedNumber
-  @Column()
-  sixth!: PickedNumber
-  @Column()
-  bonus!: PickedNumber
+  @Column("tinyint")
+  first_num!: PickedNumber
+  @Column("tinyint")
+  second_num!: PickedNumber
+  @Column("tinyint")
+  third_num!: PickedNumber
+  @Column("tinyint")
+  fourth_num!: PickedNumber
+  @Column("tinyint")
+  fifth_num!: PickedNumber
+  @Column("tinyint")
+  sixth_num!: PickedNumber
+  @Column("tinyint")
+  bonus_num!: PickedNumber
+  @Column("bigint")
+  first_prize!: string
+  @Column("int")
+  second_prize!: Money
+  @Column("mediumint")
+  third_prize!: Money
+  @Column("mediumint")
+  fourth_prize!: Money
+  @Column("smallint")
+  fifth_prize!: Money
 
   private constructor() {}
 }
@@ -93,21 +117,27 @@ export class WinningNumbersEntityAdapter {
   public static convertEntityToWinningNumbers(entity: WinningNumbersEntity): WinningNumbers {
     return new WinningNumbers(
         new Round(entity.round),
-        new Game([entity.first, entity.second, entity.third, entity.fourth, entity.fifth, entity.sixth]),
-        entity.bonus
+        new Game([entity.first_num, entity.second_num, entity.third_num, entity.fourth_num, entity.fifth_num, entity.sixth_num]),
+        entity.bonus_num,
+        [parseInt(entity.first_prize, 10), entity.second_prize, entity.third_prize, entity.fourth_prize, entity.fifth_prize]
     )
   }
 
   public static convertWinningNumbersToEntity(winningNumbers: WinningNumbers): WinningNumbersEntity {
     return {
-      round: winningNumbers.round.val,
-      first: winningNumbers.mains.getNthPick(1),
-      second: winningNumbers.mains.getNthPick(2),
-      third: winningNumbers.mains.getNthPick(3),
-      fourth: winningNumbers.mains.getNthPick(4),
-      fifth: winningNumbers.mains.getNthPick(5),
-      sixth: winningNumbers.mains.getNthPick(6),
-      bonus: winningNumbers.bonus
+      round: winningNumbers.round.num,
+      first_num: winningNumbers.mains.getNthPick(1),
+      second_num: winningNumbers.mains.getNthPick(2),
+      third_num: winningNumbers.mains.getNthPick(3),
+      fourth_num: winningNumbers.mains.getNthPick(4),
+      fifth_num: winningNumbers.mains.getNthPick(5),
+      sixth_num: winningNumbers.mains.getNthPick(6),
+      bonus_num: winningNumbers.bonus,
+      first_prize: `${winningNumbers.prizeOf(Tiers.JACKPOT)}`,
+      second_prize: winningNumbers.prizeOf(Tiers.SECOND),
+      third_prize: winningNumbers.prizeOf(Tiers.THIRD),
+      fourth_prize: winningNumbers.prizeOf(Tiers.FOURTH),
+      fifth_prize: winningNumbers.prizeOf(Tiers.FIFTH)
     }
   }
 }

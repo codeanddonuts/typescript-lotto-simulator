@@ -3,7 +3,7 @@ import { Game } from "../../../main/lotto/domain/Game"
 import { LottoMachine } from "../../../main/lotto/service/LottoMachine"
 import { Ticket } from "../../../main/lotto/domain/Ticket"
 import { createConnection, getConnectionOptions, getConnection } from "typeorm"
-import { APPROXIMATE_RECENT_ROUND } from "../RecentRound"
+import { APPROXIMATE_RECENT_ROUND } from "../RecentRoundMock"
 
 let lottoMachine: LottoMachine
 

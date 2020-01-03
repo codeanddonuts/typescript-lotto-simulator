@@ -5,7 +5,8 @@ import { WinningNumbersRepository } from "../../../main/lotto/repository/Winning
 import { createConnection, getConnection, getConnectionOptions } from "typeorm"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 import { WinningNumbersEntityAdapter } from "../../../main/lotto/repository/WinningNumbersCachedWebCrawler"
-import { APPROXIMATE_RECENT_ROUND } from "../RecentRound"
+import { APPROXIMATE_RECENT_ROUND } from "../RecentRoundMock"
+import { Tiers } from "../../../main/lotto/domain/Tier"
 
 let winningNumbersRepository: WinningNumbersRepository
 
@@ -32,6 +33,11 @@ describe("The winner of round n is ...", () => {
     expect(winningNumbers.round).toEqual(new Round(889))
     expect(winningNumbers.mains).toEqual(new Game([3, 13, 29, 38, 39, 42]))
     expect(winningNumbers.bonus).toEqual(26)
+    expect(winningNumbers.prizeOf(Tiers.JACKPOT)).toEqual(2108986950)
+    expect(winningNumbers.prizeOf(Tiers.SECOND)).toEqual(58582971)
+    expect(winningNumbers.prizeOf(Tiers.THIRD)).toEqual(1503413)
+    expect(winningNumbers.prizeOf(Tiers.FOURTH)).toEqual(50000)
+    expect(winningNumbers.prizeOf(Tiers.FIFTH)).toEqual(5000)
   })
 
   it("529, [18, 20, 24, 27, 31, 42] + 39", async () => {
@@ -39,6 +45,11 @@ describe("The winner of round n is ...", () => {
     expect(winningNumbers.round).toEqual(new Round(529))
     expect(winningNumbers.mains).toEqual(new Game([18, 20, 24, 27, 31, 42]))
     expect(winningNumbers.bonus).toEqual(39)
+    expect(winningNumbers.prizeOf(Tiers.JACKPOT)).toEqual(1749114797)
+    expect(winningNumbers.prizeOf(Tiers.SECOND)).toEqual(70671305)
+    expect(winningNumbers.prizeOf(Tiers.THIRD)).toEqual(1552699)
+    expect(winningNumbers.prizeOf(Tiers.FOURTH)).toEqual(50000)
+    expect(winningNumbers.prizeOf(Tiers.FIFTH)).toEqual(5000)
   })
 
   it("321, [12, 18, 20, 21, 25, 34] + 42", async () => {
@@ -46,6 +57,11 @@ describe("The winner of round n is ...", () => {
     expect(winningNumbers.round).toEqual(new Round(321))
     expect(winningNumbers.mains).toEqual(new Game([12, 18, 20, 21, 25, 34]))
     expect(winningNumbers.bonus).toEqual(42)
+    expect(winningNumbers.prizeOf(Tiers.JACKPOT)).toEqual(1959136100)
+    expect(winningNumbers.prizeOf(Tiers.SECOND)).toEqual(55975318)
+    expect(winningNumbers.prizeOf(Tiers.THIRD)).toEqual(1535374)
+    expect(winningNumbers.prizeOf(Tiers.FOURTH)).toEqual(56960)
+    expect(winningNumbers.prizeOf(Tiers.FIFTH)).toEqual(5000)
   })
 })
 
@@ -64,16 +80,23 @@ describe("Entity -> Winning Numbers", () => {
     expect(
         WinningNumbersEntityAdapter.convertEntityToWinningNumbers({
           round: 35,
-          first: 1,
-          second: 3,
-          third: 7,
-          fourth: 21,
-          fifth: 25,
-          sixth: 34,
-          bonus: 8
+          first_num: 1,
+          second_num: 3,
+          third_num: 7,
+          fourth_num: 21,
+          fifth_num: 25,
+          sixth_num: 34,
+          bonus_num: 8,
+          first_prize: "1000000000",
+          second_prize: 50_000_000,
+          third_prize: 1_500_000,
+          fourth_prize: 50_000,
+          fifth_prize: 5_000
         })
     ).toEqual(
-        new WinningNumbers(new Round(35), new Game([1, 3, 7, 21, 25, 34]), 8)
+        new WinningNumbers(
+            new Round(35), new Game([1, 3, 7, 21, 25, 34]), 8, [1_000_000_000, 50_000_000, 1_500_000, 50_000, 5_000]
+        )
     )
   })
 })
@@ -82,17 +105,24 @@ describe("Winning Numbers -> Entity", () => {
   it("35, [1, 3, 7, 21, 25, 34] + 8", () => {
     expect(
         WinningNumbersEntityAdapter.convertWinningNumbersToEntity(
-            new WinningNumbers(new Round(35), new Game([1, 3, 7, 21, 25, 34]), 8)
+            new WinningNumbers(
+                new Round(35), new Game([1, 3, 7, 21, 25, 34]), 8, [1_000_000_000, 50_000_000, 1_500_000, 50_000, 5_000]
+            )
         )
     ).toEqual({
       round: 35,
-      first: 1,
-      second: 3,
-      third: 7,
-      fourth: 21,
-      fifth: 25,
-      sixth: 34,
-      bonus: 8
+      first_num: 1,
+      second_num: 3,
+      third_num: 7,
+      fourth_num: 21,
+      fifth_num: 25,
+      sixth_num: 34,
+      bonus_num: 8,
+      first_prize: "1000000000",
+      second_prize: 50_000_000,
+      third_prize: 1_500_000,
+      fourth_prize: 50_000,
+      fifth_prize: 5_000
     })
   })
 })

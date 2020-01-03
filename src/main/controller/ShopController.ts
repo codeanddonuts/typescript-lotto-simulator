@@ -6,6 +6,7 @@ import { LottoMachine } from "../lotto/service/LottoMachine"
 import { WinningNumbersRepository } from "../lotto/repository/WinningNumbersRepository"
 import { Money } from "../lotto/domain/Money"
 import { PickedNumberCons, PickGroupCons } from "../lotto/domain/Game"
+import { Round } from "../lotto/domain/Round"
 
 @injectable()
 export class ShopController implements Controller {
@@ -19,6 +20,7 @@ export class ShopController implements Controller {
       type Query {
         price: Int!
         maxPurchaseAmount: Int!
+        recentRound: Int!
       }
 
       type Report {
@@ -27,7 +29,7 @@ export class ShopController implements Controller {
       }
 
       type Mutation {
-        purchase(investment: Int!, manualPicks: [[Int!]!]!): Report
+        purchase(investment: Int!, manualPicks: [[Int!]!]!, round: Int): Report
       }
     `
   }
@@ -36,13 +38,15 @@ export class ShopController implements Controller {
     return {
       Query: {
         price: () => LottoMachine.PRICE_PER_GAME,
-        maxPurchaseAmount: () => LottoMachine.MAX_PURCHASE_AMOUNT
+        maxPurchaseAmount: () => LottoMachine.MAX_PURCHASE_AMOUNT,
+        recentRound: async () => (await this.winningNumbersRepository.ofRecent()).round.num
       },
       Mutation: {
         purchase: async (_, { investment, manualPicks, round }) => {
           const validatedPicks = (manualPicks as number[][]).map(numbers => PickGroupCons(numbers.map(n => PickedNumberCons(n))))
-          const winningNumbers = round ? this.winningNumbersRepository.of(round) : this.winningNumbersRepository.ofRecent()
-          return (await this.lottoShop.purchase(investment as Money, validatedPicks)).matchResult(await winningNumbers)
+          const winningNumbers = round ? this.winningNumbersRepository.of(new Round(round)) : this.winningNumbersRepository.ofRecent()
+          const ticket = await this.lottoShop.purchase(investment as Money, validatedPicks, round ? new Round(round) : undefined)
+          return ticket.matchResult(await winningNumbers)
         }
       }
     }

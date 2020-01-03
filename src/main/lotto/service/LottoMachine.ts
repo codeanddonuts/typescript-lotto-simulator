@@ -4,6 +4,7 @@ import { WinningNumbersRepository } from "../repository/WinningNumbersRepository
 import { injectable, inject } from "inversify"
 import { Money } from "../domain/Money"
 import ContainerUtils from "../../utils/ContainerUtils"
+import { Round } from "../domain/Round"
 
 @injectable()
 export class LottoMachine {
@@ -12,12 +13,12 @@ export class LottoMachine {
 
   constructor(@inject(WinningNumbersRepository) private readonly winningNumbersRepository: WinningNumbersRepository) {}
 
-  public async issue(manualPicks: PickGroup[], autoAmount: number): Promise<Ticket> | never {
+  public async issue(manualPicks: PickGroup[], autoAmount: number, round?: Round): Promise<Ticket> | never {
     if (manualPicks.length + autoAmount <= 0) {
       throw new Error("먼저 번호를 입력하세요.")
     }
     return new Ticket(
-        (await this.winningNumbersRepository.ofRecent()).round,
+        round ?? (await this.winningNumbersRepository.ofRecent()).round,
         [...manualPicks.map(x => new Game(x)), ...ContainerUtils.intRange(0, autoAmount).map(() => Game.autoGen())]
     )
   }

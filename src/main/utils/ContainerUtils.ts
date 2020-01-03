@@ -17,9 +17,9 @@ export default class ContainerUtils {
     let i = arr.length
     while (i !== 0) {
       const j = Math.floor(Math.random() * i)
-      const tmp = arr[--i]
+      const temp = arr[--i]
       arr[i] = arr[j]
-      arr[j] = tmp
+      arr[j] = temp
     }
     return arr
   }
