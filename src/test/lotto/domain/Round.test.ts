@@ -3,7 +3,9 @@ import { Round } from "../../../main/lotto/domain/Round"
 
 describe("Are valid rounds?", () => {
   it("Yes", () =>
-    expect(() => new Round(892)).not.toThrow()
+    fc.assert(
+        fc.property(fc.integer(Round.MIN_ROUND, Number.MAX_SAFE_INTEGER), n => expect(() => new Round(n)).not.toThrow())
+    )
   )
 
   it("No: Underflow", () =>

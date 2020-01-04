@@ -1,30 +1,24 @@
-import { container } from "../../../main/di/Inversify.config"
 import { Round } from "../../../main/lotto/domain/Round"
 import { Game } from "../../../main/lotto/domain/Game"
 import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
-import { createConnection, getConnection, getConnectionOptions } from "typeorm"
+import { getConnection } from "typeorm"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
-import { WinningNumbersEntityAdapter } from "../../../main/lotto/repository/WinningNumbersCachedWebCrawler"
-import { APPROXIMATE_RECENT_ROUND } from "../RecentRoundMock"
-import { Tiers } from "../../../main/lotto/domain/Tier"
+import { WinningNumbersEntityAdapter, WinningNumbersCachedWebCrawler } from "../../../main/lotto/repository/WinningNumbersCachedWebCrawler"
+import { APPROXIMATE_RECENT_ROUND, connectTestDB } from "../../TestUtils"
+import { TIER } from "../../../main/lotto/domain/Tier"
 
 let winningNumbersRepository: WinningNumbersRepository
 
 beforeAll(async () => {
-  await createConnection(Object.assign(await getConnectionOptions(), { database : "test" }))
+  await connectTestDB()
 })
 
 beforeEach(async () => {
-  container.snapshot()
-  winningNumbersRepository = container.get<WinningNumbersRepository>(WinningNumbersRepository)
+  winningNumbersRepository = new WinningNumbersCachedWebCrawler()
 })
 
-afterEach(async () => {
-  container.restore()
-})
-
-afterAll(async () => {
-  await getConnection().close().catch(e => console.log(e))
+afterAll(() => {
+  getConnection().close()
 })
 
 describe("The winner of round n is ...", () => {
@@ -33,11 +27,12 @@ describe("The winner of round n is ...", () => {
     expect(winningNumbers.round).toEqual(new Round(889))
     expect(winningNumbers.mains).toEqual(new Game([3, 13, 29, 38, 39, 42]))
     expect(winningNumbers.bonus).toEqual(26)
-    expect(winningNumbers.prizeOf(Tiers.JACKPOT)).toEqual(2108986950)
-    expect(winningNumbers.prizeOf(Tiers.SECOND)).toEqual(58582971)
-    expect(winningNumbers.prizeOf(Tiers.THIRD)).toEqual(1503413)
-    expect(winningNumbers.prizeOf(Tiers.FOURTH)).toEqual(50000)
-    expect(winningNumbers.prizeOf(Tiers.FIFTH)).toEqual(5000)
+    expect(winningNumbers.prizeOf(TIER.JACKPOT)).toEqual(2108986950)
+    expect(winningNumbers.prizeOf(TIER.SECOND)).toEqual(58582971)
+    expect(winningNumbers.prizeOf(TIER.THIRD)).toEqual(1503413)
+    expect(winningNumbers.prizeOf(TIER.FOURTH)).toEqual(50000)
+    expect(winningNumbers.prizeOf(TIER.FIFTH)).toEqual(5000)
+    expect(winningNumbers.equals(await winningNumbersRepository.of(new Round(889)))).toBeTruthy()
   })
 
   it("529, [18, 20, 24, 27, 31, 42] + 39", async () => {
@@ -45,11 +40,12 @@ describe("The winner of round n is ...", () => {
     expect(winningNumbers.round).toEqual(new Round(529))
     expect(winningNumbers.mains).toEqual(new Game([18, 20, 24, 27, 31, 42]))
     expect(winningNumbers.bonus).toEqual(39)
-    expect(winningNumbers.prizeOf(Tiers.JACKPOT)).toEqual(1749114797)
-    expect(winningNumbers.prizeOf(Tiers.SECOND)).toEqual(70671305)
-    expect(winningNumbers.prizeOf(Tiers.THIRD)).toEqual(1552699)
-    expect(winningNumbers.prizeOf(Tiers.FOURTH)).toEqual(50000)
-    expect(winningNumbers.prizeOf(Tiers.FIFTH)).toEqual(5000)
+    expect(winningNumbers.prizeOf(TIER.JACKPOT)).toEqual(1749114797)
+    expect(winningNumbers.prizeOf(TIER.SECOND)).toEqual(70671305)
+    expect(winningNumbers.prizeOf(TIER.THIRD)).toEqual(1552699)
+    expect(winningNumbers.prizeOf(TIER.FOURTH)).toEqual(50000)
+    expect(winningNumbers.prizeOf(TIER.FIFTH)).toEqual(5000)
+    expect(winningNumbers.equals(await winningNumbersRepository.of(new Round(529)))).toBeTruthy()
   })
 
   it("321, [12, 18, 20, 21, 25, 34] + 42", async () => {
@@ -57,11 +53,12 @@ describe("The winner of round n is ...", () => {
     expect(winningNumbers.round).toEqual(new Round(321))
     expect(winningNumbers.mains).toEqual(new Game([12, 18, 20, 21, 25, 34]))
     expect(winningNumbers.bonus).toEqual(42)
-    expect(winningNumbers.prizeOf(Tiers.JACKPOT)).toEqual(1959136100)
-    expect(winningNumbers.prizeOf(Tiers.SECOND)).toEqual(55975318)
-    expect(winningNumbers.prizeOf(Tiers.THIRD)).toEqual(1535374)
-    expect(winningNumbers.prizeOf(Tiers.FOURTH)).toEqual(56960)
-    expect(winningNumbers.prizeOf(Tiers.FIFTH)).toEqual(5000)
+    expect(winningNumbers.prizeOf(TIER.JACKPOT)).toEqual(1959136100)
+    expect(winningNumbers.prizeOf(TIER.SECOND)).toEqual(55975318)
+    expect(winningNumbers.prizeOf(TIER.THIRD)).toEqual(1535374)
+    expect(winningNumbers.prizeOf(TIER.FOURTH)).toEqual(56960)
+    expect(winningNumbers.prizeOf(TIER.FIFTH)).toEqual(5000)
+    expect(winningNumbers.equals(await winningNumbersRepository.of(new Round(321)))).toBeTruthy()
   })
 })
 

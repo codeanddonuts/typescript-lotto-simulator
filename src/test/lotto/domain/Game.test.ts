@@ -58,7 +58,7 @@ describe("Are six numbers?", () => {
     )
   )
 
-  it("No: Underflow", () =>
+  it("No: Overflow", () =>
     fc.assert(
       fc.property(
           fc.array(fc.integer(PICK_RANGE.MIN, PICK_RANGE.MAX), NUMBER_OF_PICKS + 1, 255),
@@ -86,4 +86,12 @@ describe("Are numbers all different?", () => {
         )
     )
   )
+})
+
+describe("Is auto generation valid?", () => {
+  it("Yes", () => {
+    const picks = (Game.autoGen() as any).picks as ReadonlySet<number>
+    expect(() => Array.from(picks.values()).every(n => PickedNumberCons(n))).not.toThrow()
+    expect(picks.size).toEqual(NUMBER_OF_PICKS)
+  })
 })

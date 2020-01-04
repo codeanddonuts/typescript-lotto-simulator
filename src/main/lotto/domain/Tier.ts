@@ -2,7 +2,7 @@ import { NumberOfMatches } from "./Game"
 
 export type Tier = 0 | 1 | 2 | 3 | 4 | 5
 
-export const enum Tiers {
+export const enum TIER {
   NONE = 0,
   JACKPOT,
   SECOND,
@@ -11,15 +11,15 @@ export const enum Tiers {
   FIFTH
 }
 
-export const LOWEST_TIER = Tiers.FIFTH
+export const LOWEST_TIER = TIER.FIFTH
 
-export class TierMetadata {
-  private static readonly RESULTS: Readonly<TierMetadata[]> = [
-    new TierMetadata(Tiers.JACKPOT, 6),
-    new TierMetadata(Tiers.SECOND, 5, true),
-    new TierMetadata(Tiers.THIRD, 5, false),
-    new TierMetadata(Tiers.FOURTH, 4),
-    new TierMetadata(Tiers.FIFTH, 3)
+export class TierTable {
+  private static readonly RESULTS: Readonly<TierTable[]> = [
+    new TierTable(TIER.JACKPOT, 6),
+    new TierTable(TIER.SECOND, 5, true),
+    new TierTable(TIER.THIRD, 5, false),
+    new TierTable(TIER.FOURTH, 4),
+    new TierTable(TIER.FIFTH, 3)
   ].reverse()
 
   public static query(numberOfMatches: NumberOfMatches, containsBonus: boolean): Tier {
@@ -29,7 +29,7 @@ export class TierMetadata {
         return temp.filter(x => x.containsBonus === containsBonus).pop()?.tier
       }
       return temp.pop()?.tier
-    })() ?? Tiers.NONE
+    })() ?? TIER.NONE
   }
 
   private constructor(

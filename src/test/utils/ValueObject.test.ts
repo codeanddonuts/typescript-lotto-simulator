@@ -24,6 +24,15 @@ beforeEach(() => {
   map = new ValueObjectKeyMap()
 })
 
+describe("Is sample class valid?", () => {
+  it("Yes", () => {
+    const p = new Person("Kang", 29)
+    expect(p.equals(p)).toBeTruthy()
+    expect(p.equals(3)).toBeFalsy()
+    expect(p.equals(new Person("Kang", 29))).toBeTruthy()
+  })
+})
+
 describe("Cleared?", () => {
   it("Yes", () => {
     map.set(new Person("Park", 17), "Bad girl").set(new Person("Kim", 14), "Good boy").clear()
@@ -45,7 +54,7 @@ describe("How many times?", () => {
     let i = 1
     map.set(new Person("Park", 17), "Bad girl").set(new Person("Kim", 14), "Good boy").set(new Person("Nam", 21), "Hi")
     expect(map.size).toEqual(3)
-    map.forEach(person => i *= 2 )
+    map.forEach(() => i *= 2 )
     expect(i).toEqual(8)
   })
 })

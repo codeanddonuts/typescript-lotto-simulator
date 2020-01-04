@@ -1,27 +1,33 @@
-import { container } from "./di/Inversify.config"
+import http from "http"
 import Koa from "koa"
 import Router from "koa-router"
 import serve from "koa-static"
 import compress from "koa-compress"
+import logger from "koa-logger"
 import Controller from "./controller/Controller"
 import { ApolloServer, makeExecutableSchema } from "apollo-server-koa"
-import { createConnection, getConnectionOptions } from "typeorm"
+import { createConnection, getConnectionOptions, getConnection } from "typeorm"
+import { injectable, inject, multiInject } from "inversify"
+import { WinningNumbersEntity } from "./lotto/repository/WinningNumbersCachedWebCrawler"
 
 const enum HttpStatus {
   NOT_FOUND = 404
 }
 
-new class App {
+@injectable()
+export class App {
   private static readonly API_DIR = "/api"
   private static readonly STATIC_FILES_DIR = "/public"
   private static readonly PORT = 80
  
-  private readonly app = new Koa()
-  private readonly apiServer: ApolloServer
+  private readonly server: http.Server
 
-  constructor(private readonly router: Router, private readonly controllers: Readonly<Controller[]>) {
-    this.setDefaultRoutings()
-    this.apiServer = new ApolloServer({
+  constructor(
+      @inject(Router) private readonly router: Router,
+      @multiInject(Controller) private readonly controllers: Readonly<Controller[]>
+  ) {
+    const koa = new Koa()
+    const apollo = new ApolloServer({
       schema: makeExecutableSchema({
         typeDefs: controllers.map(x => x.typeDefs()).filter(x => x != ""),
         resolvers: controllers.map(x => x.resolvers()).filter(x => Object.keys(x).length > 0)
@@ -29,13 +35,14 @@ new class App {
       playground: process.env.NODE_ENV !== "production",
       debug: process.env.NODE_ENV !== "production"
     })
-    this.apiServer.applyMiddleware({ app: this.app, path: App.API_DIR })
-    this.app.use(serve(__dirname + App.STATIC_FILES_DIR))
-            .use(this.router.routes())
-            .use(this.router.allowedMethods())
-            .use(compress)
-    this.connectDatabase().then(() => this.app.listen(App.PORT))
-                          .catch(e => console.log(e))
+    apollo.applyMiddleware({ app: koa, path: App.API_DIR })
+    this.setDefaultRoutings()
+    koa.use(serve(__dirname + App.STATIC_FILES_DIR))
+       .use(this.router.routes())
+       .use(this.router.allowedMethods())
+       .use(compress)
+       .use(logger)
+    this.server = http.createServer(koa.callback())
   }
 
   private setDefaultRoutings() {
@@ -48,16 +55,31 @@ new class App {
     })
   }
 
+  public async start() : Promise<void> {
+    await this.connectDatabase()
+    this.server.listen(App.PORT)
+  }
+
   private async connectDatabase(): Promise<void> {
+    const connectionOptions = await getConnectionOptions()
     createConnection(
         Object.assign(
-            await getConnectionOptions(), {
+            connectionOptions, {
               cache: true,
               entities: [
-                  "src/main/lotto/repository/**/*.ts"
+                WinningNumbersEntity
               ]
             }
         )
     )
   }
-}(container.get<Router>(Router), container.getAll<Controller>(Controller))
+
+  public async stop(): Promise<void> {
+    this.server.close()
+    return getConnection().close()
+  }
+
+  public getServer(): http.Server {
+    return this.server
+  }
+}

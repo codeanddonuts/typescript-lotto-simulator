@@ -5,7 +5,7 @@ import { PromiseMaybeT } from "../../utils/MaybeT"
 import { injectable } from "inversify"
 import { getConnection, Entity, PrimaryColumn, Column } from "typeorm"
 import { Money } from "../domain/Money"
-import { Tiers } from "../domain/Tier"
+import { TIER } from "../domain/Tier"
 import { WinningNumbersWebCrawler } from "./WinningNumbersWebCrawler"
 import { Maybe } from "../../utils/Maybe"
 
@@ -28,7 +28,8 @@ export class WinningNumbersCachedWebCrawler extends WinningNumbersWebCrawler {
         PromiseMaybeT.liftMaybe(super.parseRecentRound(response)).bind(round =>
           PromiseMaybeT.cons(this.retrieveFromCacheOrParseNew(round, response))
         )
-      ).run().then(x => x.getOrThrow())
+      ).run()
+      .then(x => x.getOrThrow())
     } catch (e) {
       if (e.isAxiosError) {
         throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
@@ -108,11 +109,11 @@ export class WinningNumbersEntityAdapter {
       fifth_num: winningNumbers.mains.getNthPick(5),
       sixth_num: winningNumbers.mains.getNthPick(6),
       bonus_num: winningNumbers.bonus,
-      first_prize: `${winningNumbers.prizeOf(Tiers.JACKPOT)}`,
-      second_prize: winningNumbers.prizeOf(Tiers.SECOND),
-      third_prize: winningNumbers.prizeOf(Tiers.THIRD),
-      fourth_prize: winningNumbers.prizeOf(Tiers.FOURTH),
-      fifth_prize: winningNumbers.prizeOf(Tiers.FIFTH)
+      first_prize: `${winningNumbers.prizeOf(TIER.JACKPOT)}`,
+      second_prize: winningNumbers.prizeOf(TIER.SECOND),
+      third_prize: winningNumbers.prizeOf(TIER.THIRD),
+      fourth_prize: winningNumbers.prizeOf(TIER.FOURTH),
+      fifth_prize: winningNumbers.prizeOf(TIER.FIFTH)
     }
   }
 }

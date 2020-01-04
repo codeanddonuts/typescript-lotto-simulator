@@ -37,7 +37,7 @@ export class ShopController implements Controller {
   public resolvers(): IResolvers<any, any> {
     return {
       Query: {
-        price: () => LottoMachine.PRICE_PER_GAME,
+        price: () => LottoShop.PRICE_PER_GAME,
         maxPurchaseAmount: () => LottoMachine.MAX_PURCHASE_AMOUNT,
         recentRound: async () => (await this.winningNumbersRepository.ofRecent()).round.num
       },
