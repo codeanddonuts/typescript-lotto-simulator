@@ -2,13 +2,14 @@ import { Game } from "./Game"
 import { Round } from "./Round"
 import { WinningNumbers } from "./WinningNumbers"
 import { Tier, TierTable } from "./Tier"
+import { UserInputError } from "apollo-server-koa"
 
 export class Ticket {
   constructor(private readonly _round: Round, private readonly games: Readonly<Game[]>) {}
 
   public matchResult(winningNumbers: WinningNumbers): Report | never {
     if (!this._round.equals(winningNumbers.round)) {
-      throw new Error("티켓과 당첨 번호의 회차가 일치하지 않습니다.")
+      throw new UserInputError("티켓과 당첨 번호의 회차가 일치하지 않습니다.")
     }
     const temp: Map<Tier, number> = new Map()
     this.games.map(game =>

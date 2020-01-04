@@ -8,34 +8,21 @@ import { Money } from "../domain/Money"
 import { TIER } from "../domain/Tier"
 import { WinningNumbersWebCrawler } from "./WinningNumbersWebCrawler"
 import { Maybe } from "../../utils/Maybe"
+import { WinningNumbersFetchFailureException } from "./WinningNumbersFetchFailureException"
 
 @injectable()
 export class WinningNumbersCachedWebCrawler extends WinningNumbersWebCrawler {
   public async of(round: Round): Promise<WinningNumbers> | never {
-    try {
-      return (await this.retrieveFromCacheOrParseNew(round)).getOrThrow()
-    } catch (e) {
-      if (e.isAxiosError) {
-        throw new Error(`${round}회차의 당첨 번호를 가져오는 데에 실패하였습니다.`)
-      }
-      throw new Error("서버 점검 중입니다.")
-    }
+    return (await this.retrieveFromCacheOrParseNew(round)).getOrThrow(WinningNumbersFetchFailureException.of(round))
   }
 
   public async ofRecent(): Promise<WinningNumbers> | never {
-    try {
-      return PromiseMaybeT.cons(super.requestFromWeb()).bind(response =>
-        PromiseMaybeT.liftMaybe(super.parseRecentRound(response)).bind(round =>
-          PromiseMaybeT.cons(this.retrieveFromCacheOrParseNew(round, response))
-        )
-      ).run()
-      .then(x => x.getOrThrow())
-    } catch (e) {
-      if (e.isAxiosError) {
-        throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
-      }
-      throw new Error("서버 점검 중입니다.")
-    }
+    return PromiseMaybeT.cons(super.requestFromWeb()).bind(response =>
+      PromiseMaybeT.liftMaybe(super.parseRecentRound(response)).bind(round =>
+        PromiseMaybeT.cons(this.retrieveFromCacheOrParseNew(round, response))
+      )
+    ).run()
+    .then(res => res.getOrThrow(WinningNumbersFetchFailureException.ofRecent()))
   }
 
   private async retrieveFromCacheOrParseNew(round: Round, response?: string): Promise<Maybe<WinningNumbers>> {

@@ -1,11 +1,12 @@
 import ValueObject from "../../utils/ValueObject"
+import { UserInputError } from "apollo-server-koa"
 
 export class Round implements ValueObject {
   public static MIN_ROUND = 1
 
   constructor(private readonly _num: number) {
     if (_num < Round.MIN_ROUND) {
-      throw new Error("잘못된 회차입니다.")
+      throw new UserInputError("잘못된 회차입니다.")
     }
   }
 

@@ -28,7 +28,7 @@ export class Templates {
               <div class="right" style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 10px; grid-auto-rows: minmax(100px, auto);">
                 <div style="grid-column: 3;">
                   <select id="round">
-                    <option value="${recentRound}" selected>${recentRound} 회</option>
+                    <option value="${recentRound}" selected>${recentRound}회</option>
                   </select>
                   <br />
                   <input id="submit-purchase" type="button" value="구매하기" />
@@ -43,7 +43,7 @@ export class Templates {
 
   bakeRoundOptions(recentRound) {
     return Array.from(Array(recentRound - 1).keys()).reverse()
-                                                    .map(i => `<option value="${i + 1}">${i + 1} 회</option>`)
+                                                    .map(i => `<option value="${i + 1}">${i + 1}회</option>`)
                                                     .reduce((a, b) => a + b, "")
   }
 

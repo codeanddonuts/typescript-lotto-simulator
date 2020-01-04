@@ -4,6 +4,7 @@ import { LottoMachine } from "./LottoMachine"
 import { Ticket } from "../domain/Ticket"
 import { PickGroup } from "../domain/Game"
 import { Round } from "../domain/Round"
+import { UserInputError } from "apollo-server-koa"
 
 @injectable()
 export class LottoShop {
@@ -13,7 +14,7 @@ export class LottoShop {
 
   public purchase(investment: Money, manualPicks: PickGroup[], round?: Round): Promise<Ticket> | never{
     if (investment < LottoShop.PRICE_PER_GAME) {
-      throw new Error("지불 금액이 부족합니다.")
+      throw new UserInputError("지불 금액이 부족합니다.")
     }
     const totalPurchaseAmount = Math.min(Math.floor(investment / LottoShop.PRICE_PER_GAME), LottoMachine.MAX_PURCHASE_AMOUNT)
     const manualAmount = Math.min(manualPicks.length, totalPurchaseAmount)

@@ -7,6 +7,7 @@ import * as iconv from "iconv-lite"
 import { WinningNumbersRepository } from "./WinningNumbersRepository"
 import { Money } from "../domain/Money"
 import { injectable } from "inversify"
+import { WinningNumbersFetchFailureException } from "./WinningNumbersFetchFailureException"
 
 const FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
 const FETCH_URL_ROUND_ATTR = "&drwNo="
@@ -17,33 +18,19 @@ const RECENT_ROUND_PATTERN = /<option value="\d+"  >/
 @injectable()
 export class WinningNumbersWebCrawler implements WinningNumbersRepository {
   public async of(round: Round): Promise<WinningNumbers> | never {
-    try {
       return (await this.requestFromWeb(round)).bind(response => this.parseWinningNumbersAndPrizes(response))
                                                .map(result => new WinningNumbers(round, result.game, result.bonus, result.prizes))
-                                               .getOrThrow()
-    } catch (e) {
-      if (e.isAxiosError) {
-        throw new Error(`${round}회차의 당첨 번호를 가져오는 데에 실패하였습니다.`)
-      }
-      throw new Error("서버 점검 중입니다.")
-    }
+                                               .getOrThrow(WinningNumbersFetchFailureException.of(round))
   }
 
   public async ofRecent(): Promise<WinningNumbers> | never {
-    try {
-      return (await this.requestFromWeb()).bind(response =>
-        this.parseWinningNumbersAndPrizes(response).bind(result => 
-          this.parseRecentRound(response).map(round =>
-            new WinningNumbers(round, result.game, result.bonus, result.prizes)
-          )
+    return (await this.requestFromWeb()).bind(response =>
+      this.parseWinningNumbersAndPrizes(response).bind(result => 
+        this.parseRecentRound(response).map(round =>
+          new WinningNumbers(round, result.game, result.bonus, result.prizes)
         )
-      ).getOrThrow()
-    } catch (e) {
-      if (e.isAxiosError) {
-        throw new Error("최신 당첨 번호를 가져오는 데에 실패하였습니다.")
-      }
-      throw new Error("서버 점검 중입니다.")
-    }
+      )
+    ).getOrThrow(WinningNumbersFetchFailureException.ofRecent())
   }
 
   protected async requestFromWeb(round?: Round): Promise<Maybe<string>> {

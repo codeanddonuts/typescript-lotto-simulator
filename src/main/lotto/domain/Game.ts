@@ -1,4 +1,5 @@
 import ContainerUtils from "../../utils/ContainerUtils"
+import { UserInputError } from "apollo-server-koa"
 
 export const enum PICK_RANGE {
   MIN = 1,
@@ -15,7 +16,7 @@ export const PickedNumberCons = (n: number): PickedNumber | never => {
   if (PICK_RANGE.MIN <= n && n <= PICK_RANGE.MAX) {
     return n as PickedNumber
   }
-  throw new Error("1에서 45 범위의 숫자를 입력해주시기 바랍니다.")
+  throw new UserInputError("1에서 45 범위의 숫자를 입력해주시기 바랍니다.")
 }
 
 export const NUMBER_OF_PICKS = 6
@@ -32,7 +33,7 @@ export const PickGroupCons = (pickedNumbers: PickedNumber[]): PickGroup | never 
   if (pickedNumbers.length === NUMBER_OF_PICKS) {
     return pickedNumbers as PickGroup
   }
-  throw new Error("6개의 숫자만을 입력해주시기 바랍니다.")
+  throw new UserInputError("6개의 숫자만을 입력해주시기 바랍니다.")
 }
 
 export class Game {
@@ -49,7 +50,7 @@ export class Game {
     if (ContainerUtils.hasOnlyDistinctElements(pickGroup)) {
       this.picks = new Set(pickGroup.sort((a, b) => a - b))
     } else {
-      throw new Error("각기 다른 번호를 입력해주세요.")
+      throw new UserInputError("각기 다른 번호를 입력해주세요.")
     }
   }
 

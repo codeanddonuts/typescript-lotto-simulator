@@ -10,6 +10,8 @@ import { createConnection, getConnectionOptions, getConnection } from "typeorm"
 import { injectable, inject, multiInject } from "inversify"
 import { WinningNumbersEntity } from "./lotto/repository/WinningNumbersCachedWebCrawler"
 
+const DEV_MODE = process.env.NODE_ENV !== "production"
+
 const enum HttpStatus {
   NOT_FOUND = 404
 }
@@ -18,7 +20,7 @@ const enum HttpStatus {
 export class App {
   private static readonly API_DIR = "/api"
   private static readonly STATIC_FILES_DIR = "/public"
-  private static readonly PORT = 80
+  private static readonly PORT = DEV_MODE ? 3000 : 80
  
   private readonly server: http.Server
 
@@ -32,16 +34,20 @@ export class App {
         typeDefs: controllers.map(x => x.typeDefs()).filter(x => x != ""),
         resolvers: controllers.map(x => x.resolvers()).filter(x => Object.keys(x).length > 0)
       }),
-      playground: process.env.NODE_ENV !== "production",
-      debug: process.env.NODE_ENV !== "production"
+      formatError: e => {
+        console.log(e.message)
+        return e
+      },
+      playground: DEV_MODE,
+      debug: DEV_MODE,
     })
     apollo.applyMiddleware({ app: koa, path: App.API_DIR })
     this.setDefaultRoutings()
-    koa.use(serve(__dirname + App.STATIC_FILES_DIR))
+    koa.use(logger())
+       .use(serve(__dirname + App.STATIC_FILES_DIR))
        .use(this.router.routes())
        .use(this.router.allowedMethods())
        .use(compress)
-       .use(logger)
     this.server = http.createServer(koa.callback())
   }
 
@@ -79,7 +85,7 @@ export class App {
     return getConnection().close()
   }
 
-  public getServer(): http.Server {
+  public getHttpServer(): http.Server {
     return this.server
   }
 }

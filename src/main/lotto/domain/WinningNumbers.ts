@@ -3,6 +3,7 @@ import { Round } from "./Round"
 import { Game, PickedNumber } from "./Game"
 import { LOWEST_TIER, Tier } from "./Tier"
 import { Money } from "./Money"
+import { UserInputError } from "apollo-server-koa"
 
 export class WinningNumbers implements ValueObject {
   constructor(
@@ -12,7 +13,7 @@ export class WinningNumbers implements ValueObject {
       private readonly prizes: Money[]
   ) {
     if (prizes.length !== LOWEST_TIER || prizes.some(prize => prize <= 0)) {
-      throw new Error("상금이 잘못 입력되었습니다.")
+      throw new UserInputError("상금이 잘못 입력되었습니다.")
     }
   }
 

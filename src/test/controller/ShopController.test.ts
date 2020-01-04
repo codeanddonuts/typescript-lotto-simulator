@@ -11,7 +11,7 @@ const app = container.get<App>(App)
 
 beforeAll(async () => {
   await connectTestDB()
-  app.getServer().listen(8080)
+  app.getHttpServer().listen(8080)
 })
 
 afterAll(async () => {
@@ -20,7 +20,7 @@ afterAll(async () => {
 
 describe("Price?", () => {
   it(`${LottoShop.PRICE_PER_GAME}`, async () => {
-    const res = await supertest(app.getServer()).get("/api?query={price}")
+    const res = await supertest(app.getHttpServer()).get("/api?query={price}")
                                                 .expect(200)
     expect(res.body).toEqual({
       data: {
@@ -32,7 +32,7 @@ describe("Price?", () => {
 
 describe("Maximum purchase amount?", () => {
   it(`${LottoMachine.MAX_PURCHASE_AMOUNT}`, async () => {
-    const res = await supertest(app.getServer()).get("/api?query={maxPurchaseAmount}")
+    const res = await supertest(app.getHttpServer()).get("/api?query={maxPurchaseAmount}")
                                                 .expect(200)
     expect(res.body).toEqual({
       data: {
@@ -44,7 +44,7 @@ describe("Maximum purchase amount?", () => {
 
 describe("Recent round?", () => {
   it(`${RECENT_ROUND_MOCK}`, async () => {
-    const res = await supertest(app.getServer()).get("/api?query={recentRound}")
+    const res = await supertest(app.getHttpServer()).get("/api?query={recentRound}")
                                                 .expect(200)
     expect(res.body).toEqual({
       data: {
