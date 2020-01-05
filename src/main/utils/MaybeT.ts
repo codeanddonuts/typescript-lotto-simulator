@@ -6,7 +6,7 @@ export class PromiseMaybeT<a> {
   }
 
   public static lift<a>(val: a | null | undefined): PromiseMaybeT<a> {
-    return new PromiseMaybeT(Promise.resolve(Maybe.cons(val)))
+    return new PromiseMaybeT(Promise.resolve(Maybe(val)))
   }
 
   public static liftMaybe<a>(val: Maybe<a>): PromiseMaybeT<a> {
@@ -14,7 +14,7 @@ export class PromiseMaybeT<a> {
   }
 
   public static liftPromise<a>(val: Promise<a | null | undefined>): PromiseMaybeT<a> {
-    return new PromiseMaybeT(val.then(x => Maybe.cons(x)))
+    return new PromiseMaybeT(val.then(x => Maybe(x)))
   }
 
   private constructor(private readonly val: Promise<Maybe<a>>) {}
@@ -23,7 +23,7 @@ export class PromiseMaybeT<a> {
     return this.val
   }
 
-  public map<b>(f: (x: a) => b | null | undefined): PromiseMaybeT<b> {
+  public map<b>(f: (x: a) => b): PromiseMaybeT<b> {
     return new PromiseMaybeT(this.val.then(maybe => maybe.map(f)))
   }
 
@@ -31,7 +31,7 @@ export class PromiseMaybeT<a> {
     return new PromiseMaybeT(
         this.val.then(maybe =>
           maybe.map(x => f(x).val)
-               .getOrElse(() => Promise.resolve(new Nothing()))
+               .getOrElse(() => Promise.resolve(Nothing()))
         )
     )
   }

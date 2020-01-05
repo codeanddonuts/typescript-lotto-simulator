@@ -1,8 +1,8 @@
 import fc from "fast-check"
-import { container } from "../../../main/di/Inversify.config"
+import { container } from "../../../main/config/Inversify.config"
 import { Game } from "../../../main/lotto/domain/Game"
 import { Ticket } from "../../../main/lotto/domain/Ticket"
-import { WinningNumbersRepository } from "../../../main/lotto/repository/WinningNumbersRepository"
+import { WinningNumbersApiClient } from "../../../main/lotto/service/WinningNumbersApiClient"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 import { getConnection } from "typeorm"
 import { LottoShop } from "../../../main/lotto/service/LottoShop"
@@ -14,7 +14,7 @@ let recentWinningNumbers: WinningNumbers
 beforeAll(async () => {
   await connectTestDB()
   lottoShop = container.get<LottoShop>(LottoShop)
-  recentWinningNumbers = await container.get<WinningNumbersRepository>(WinningNumbersRepository).ofRecent()
+  recentWinningNumbers = await container.get<WinningNumbersApiClient>(WinningNumbersApiClient).getRecent()
 })
 
 afterAll(async () => {

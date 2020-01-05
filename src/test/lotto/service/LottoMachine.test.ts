@@ -1,11 +1,11 @@
-import { container } from "../../../main/di/Inversify.config"
+import fc from "fast-check"
+import { container } from "../../../main/config/Inversify.config"
 import { Game } from "../../../main/lotto/domain/Game"
 import { LottoMachine } from "../../../main/lotto/service/LottoMachine"
 import { Ticket } from "../../../main/lotto/domain/Ticket"
 import { getConnection } from "typeorm"
 import { APPROXIMATE_RECENT_ROUND, connectTestDB } from "../../TestUtils"
 import { Round } from "../../../main/lotto/domain/Round"
-import fc from "fast-check"
 
 let lottoMachine: LottoMachine
 

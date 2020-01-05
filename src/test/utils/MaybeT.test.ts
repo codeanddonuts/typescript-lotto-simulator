@@ -1,150 +1,388 @@
-import { Maybe, Just, Nothing } from "../../main/utils/Maybe"
 import { PromiseMaybeT } from "../../main/utils/MaybeT"
+import { Maybe, Just, Nothing } from "../../main/utils/Maybe"
 
 describe("MaybeT of ...", () => {
-  it("11 = MaybeT(Promise(Just 11))", () =>
+  it("11 = MaybeT Promise Just 11", () =>
     expect(
         PromiseMaybeT.lift(11)
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11)))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
     )
   )
 
-  it("null = MaybeT(Promise(Nothing))", () =>
+  it("[11].pop() = MaybeT Promise Just 11", () =>
     expect(
-      PromiseMaybeT.lift(null)
+        PromiseMaybeT.lift([11].pop())
     ).toEqual(
-      PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
     )
   )
 
-  it("undefined = MaybeT(Promise(Nothing))", () =>
+  it("[].pop() = MaybeT Promise Nothing", () =>
     expect(
-      PromiseMaybeT.lift(undefined)
+        PromiseMaybeT.lift([].pop())
     ).toEqual(
-      PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
     )
   )
 
-  it("Just 11 = MaybeT(Promise(Just 11))", () =>
+  it("Just 11 = MaybeT Promise Just 11", () =>
     expect(
-        PromiseMaybeT.liftMaybe(new Just(11))
+        PromiseMaybeT.liftMaybe(Just(11))
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11)))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
     )
   )
 
-  it("Nothing = MaybeT(Promise(Nothing))", () =>
+  it("Nothing = MaybeT Promise Nothing", () =>
     expect(
-      PromiseMaybeT.liftMaybe(new Nothing())
+        PromiseMaybeT.liftMaybe(Nothing())
     ).toEqual(
-      PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
     )
   )
 
-  it("Promise(11) = MaybeT(Promise(Just 11))", () =>
+  it("Promise 11 = MaybeT Promise Just 11", () =>
     expect(
         PromiseMaybeT.liftPromise(Promise.resolve(11))
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11)))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
     )
   )
 
-  it("Promise(null) = MaybeT(Promise(Nothing))", () =>
+  it("Promise [11].pop() = MaybeT Promise Just 11", () =>
     expect(
-      PromiseMaybeT.liftPromise(Promise.resolve(null))
+        PromiseMaybeT.liftPromise(Promise.resolve([11].pop()))
     ).toEqual(
-      PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
     )
   )
 
-  it("Promise(undefined) = MaybeT(Promise(Nothing))", () =>
+  it("Promise [].pop() = MaybeT Promise Nothing", () =>
     expect(
-      PromiseMaybeT.liftPromise(Promise.resolve(undefined))
+        PromiseMaybeT.liftPromise(Promise.resolve([].pop()))
     ).toEqual(
-      PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("Promise void = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve())
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
     )
   )
 })
 
 describe("Running MaybeT of ...", () => {
-  it("MaybeT(Promise(Just 11)) = Promise(Just 11)", () =>
+  it("Promise Just 11 = Promise Just 11", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11))).run()
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).run()
     ).toEqual(
-        Promise.resolve(new Just(11))
+        Promise.resolve(Just(11))
     )
   )
 
-  it("MaybeT(Promise(Nothing)) = Promise(Nothing)", () =>
+  it("Promise Nothing = Promise Nothing", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing())).run()
+        PromiseMaybeT.cons(Promise.resolve(Nothing())).run()
     ).toEqual(
-        Promise.resolve(new Nothing())
+        Promise.resolve(Nothing())
+    )
+  )
+
+  it("11 = MaybeT Promise Just 11", () =>
+    expect(
+        PromiseMaybeT.lift(11).run()
+    ).toEqual(
+        Promise.resolve(Just(11))
+    )
+  )
+
+  it("[11].pop() = MaybeT Promise Just 11", () =>
+    expect(
+        PromiseMaybeT.lift([11].pop()).run()
+    ).toEqual(
+        Promise.resolve(Just(11))
+    )
+  )
+
+  it("[].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.lift([].pop()).run()
+    ).toEqual(
+        Promise.resolve(Nothing())
+    )
+  )
+
+  it("Just 11 = MaybeT Promise Just 11", () =>
+    expect(
+        PromiseMaybeT.liftMaybe(Just(11)).run()
+    ).toEqual(
+        Promise.resolve(Just(11))
+    )
+  )
+
+  it("Nothing = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftMaybe(Nothing()).run()
+    ).toEqual(
+        Promise.resolve(Nothing())
+    )
+  )
+
+  it("Promise 11 = MaybeT Promise Just 11", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve(11)).run()
+    ).toEqual(
+        Promise.resolve(Just(11))
+    )
+  )
+
+  it("Promise [11].pop() = MaybeT Promise Just 11", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve([11].pop())).run()
+    ).toEqual(
+        Promise.resolve(Just(11))
+    )
+  )
+
+  it("Promise [].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve([].pop())).run()
+    ).toEqual(
+        Promise.resolve(Nothing())
+    )
+  )
+
+  it("Promise void = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve()).run()
+    ).toEqual(
+        Promise.resolve(Nothing())
     )
   )
 })
 
-describe("map x -> x * 2 ...", () => {
-  it("MaybeT(Promise(Just 11)) = MaybeT(Promise(Just 22))", () =>
+describe("map x -> x * 2 to MaybeT of ...", () => {
+  it("Just 11 = MaybeT Promise Just 22", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11))).map(x => x * 2)
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).map(x => x * 2)
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(22)))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
     )
   )
 
-  it("MaybeT(Promise(Nothing)) = MaybeT(Promise(Nothing))", () =>
+  it("11 = MaybeT Promise Just 22", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing<number>())).map(x => x * 2)
+        PromiseMaybeT.lift(11).map(x => x * 2)
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("[11].pop() = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.lift([11].pop()).map(x => x * 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Nothing = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.cons(Promise.resolve(Nothing<number>())).map(x => x * 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("[].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.lift<number>([].pop()).map(x => x * 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("Promise 11 = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve(11)).map(x => x * 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Promise [11].pop() = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve([11].pop())).map(x => x * 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Promise [].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftPromise<number>(Promise.resolve([].pop())).map(x => x * 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
     )
   )
 })
 
-describe("bind x -> MaybeT (x * 2) ...", () => {
-  it("MaybeT(Promise(Just 11)) = MaybeT(Promise(Just 22))", () =>
+describe("bind x -> Maybe x * 2 to MaybeT of ...", () => {
+  it("Just 11 = MaybeT Promise Just 22", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11)))
-                               .bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe.cons(x * 2))))
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(22)))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
     )
   )
 
-  it("MaybeT(Promise(Nothing)) = MaybeT(Promise(Nothing))", () =>
+  it("11 = MaybeT Promise Just 22", () =>
     expect(
-      PromiseMaybeT.cons(Promise.resolve(new Nothing<number>()))
-                             .bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe.cons(x * 2))))
+        PromiseMaybeT.lift(11).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("[11].pop() = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.lift([11].pop()).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Nothing = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.cons(Promise.resolve(Nothing<number>())).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("[].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.lift<number>([].pop()).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("Promise 11 = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve(11)).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Promise [11].pop() = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve([11].pop())).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Promise [].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftPromise<number>(Promise.resolve([].pop())).bind(x => PromiseMaybeT.cons(Promise.resolve(Maybe(x * 2))))
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
     )
   )
 })
 
-describe("filter x -> x > 2 ...", () => {
-  it("MaybeT(Promise(Just 11)) = MaybeT(Promise(Just 11))", () =>
+describe("filter x -> x > 2 to MaybeT of ...", () => {
+  it("Just 11 = MaybeT Promise Just 22", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11))).filter(x => x > 2)
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).filter(x => x > 2)
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(22)))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
     )
   )
 
-  it("MaybeT(Promise(Just 1)) = MaybeT(Promise(Nothing))", () =>
+  it("11 = MaybeT Promise Just 22", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(1))).filter(x => x > 2)
+        PromiseMaybeT.lift(11).filter(x => x > 2)
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
     )
   )
 
-  it("MaybeT(Promise(Nothing)) = MaybeT(Promise(Nothing))", () =>
+  it("[11].pop() = MaybeT Promise Just 22", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing<number>())).filter(x => x > 2)
+        PromiseMaybeT.lift([11].pop()).filter(x => x > 2)
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing()))
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Just 1 = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("1 = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.lift(11).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("[1].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.lift([11].pop()).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("Nothing = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.cons(Promise.resolve(Nothing<number>())).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("[].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.lift<number>([].pop()).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+    )
+  )
+
+  it("Promise 11 = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve(11)).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Promise [11].pop() = MaybeT Promise Just 22", () =>
+    expect(
+        PromiseMaybeT.liftPromise(Promise.resolve([11].pop())).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Just(22)))
+    )
+  )
+
+  it("Promise [].pop() = MaybeT Promise Nothing", () =>
+    expect(
+        PromiseMaybeT.liftPromise<number>(Promise.resolve([].pop())).filter(x => x > 2)
+    ).toEqual(
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
     )
   )
 })
@@ -152,19 +390,19 @@ describe("filter x -> x > 2 ...", () => {
 describe(" ... or MaybeT(Promise(Just 7))", () => {
   it("MaybeT(Promise(Just 11)) = MaybeT(Promise(Just 11))", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11)))
-                               .orElse(() => PromiseMaybeT.cons(Promise.resolve(new Just(7))))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
+                                  .orElse(() => PromiseMaybeT.cons(Promise.resolve(Just(7))))
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11)))
+        PromiseMaybeT.cons(Promise.resolve(Just(11)))
     )
   )
 
   it("MaybeT(Promise(Nothing)) = MaybeT(Promise(Just 7))", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing()))
-                               .orElse(() => PromiseMaybeT.cons(Promise.resolve(new Just(7))))
+        PromiseMaybeT.cons(Promise.resolve(Nothing()))
+                                  .orElse(() => PromiseMaybeT.cons(Promise.resolve(Just(7))))
     ).toEqual(
-        PromiseMaybeT.cons(Promise.resolve(new Just(7)))
+        PromiseMaybeT.cons(Promise.resolve(Just(7)))
     )
   )
 })
@@ -172,7 +410,7 @@ describe(" ... or MaybeT(Promise(Just 7))", () => {
 describe("get ... or Promise(7)", () => {
   it("MaybeT(Promise(Just 11)) = Promise(11)", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11))).getOrElse(() => Promise.resolve(7))
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).getOrElse(() => Promise.resolve(7))
     ).toEqual(
         Promise.resolve(11)
     )
@@ -180,7 +418,7 @@ describe("get ... or Promise(7)", () => {
 
   it("MaybeT(Promise(Nothing)) = Promise(7)", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Nothing())).getOrElse(() => Promise.resolve(7))
+        PromiseMaybeT.cons(Promise.resolve(Nothing())).getOrElse(() => Promise.resolve(7))
     ).toEqual(
         Promise.resolve(7)
     )
@@ -190,13 +428,13 @@ describe("get ... or Promise(7)", () => {
 describe("get ... or error", () => {
   it("MaybeT(Promise(Just 11)) = Promise(11)", () =>
     expect(
-        PromiseMaybeT.cons(Promise.resolve(new Just(11))).getOrThrow()
+        PromiseMaybeT.cons(Promise.resolve(Just(11))).getOrThrow()
     ).toEqual(
         Promise.resolve(11)
     )
   )
 
   it("MaybeT(Promise(Nothing)) = error", async () => {
-    expect(PromiseMaybeT.cons(Promise.resolve(new Nothing())).getOrThrow()).rejects.toThrow()
+    expect(PromiseMaybeT.cons(Promise.resolve(Nothing())).getOrThrow()).rejects.toThrow()
   })
 })

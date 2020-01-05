@@ -1,9 +1,10 @@
 import ValueObject from "../../utils/ValueObject"
 import { Round } from "./Round"
-import { Game, PickedNumber } from "./Game"
+import { Game } from "./Game"
 import { LOWEST_TIER, Tier } from "./Tier"
 import { Money } from "./Money"
 import { UserInputError } from "apollo-server-koa"
+import { PickedNumber } from "./Pick"
 
 export class WinningNumbers implements ValueObject {
   constructor(

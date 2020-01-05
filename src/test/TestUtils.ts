@@ -1,7 +1,7 @@
 import { createConnection, getConnectionOptions } from "typeorm"
 import { Round } from "../main/lotto/domain/Round"
 import moment from "moment"
-import { WinningNumbersEntity } from "../main/lotto/repository/WinningNumbersCachedWebCrawler"
+import { WinningNumbersEntity } from "../main/lotto/infrastructure/WinningNumbersCachedWebCrawler"
 
 export const connectTestDB = async () => {
   return createConnection(
