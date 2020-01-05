@@ -67,22 +67,22 @@ export class App {
   }
 
   private async connectDatabase(): Promise<void> {
-    const connectionOptions = await getConnectionOptions()
-    createConnection(
+    await createConnection(
         Object.assign(
-            connectionOptions, {
+            await getConnectionOptions(), {
               cache: true,
               entities: [
                 WinningNumbersEntity
               ]
             }
         )
-    )
+    ).catch(e => console.log(e))
   }
 
   public async stop(): Promise<void> {
     this.server.close()
     return getConnection().close()
+                          .catch(e => console.log(e))
   }
 
   public getHttpServer(): http.Server {

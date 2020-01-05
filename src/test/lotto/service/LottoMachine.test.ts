@@ -15,7 +15,8 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  getConnection().close()
+  await getConnection().close()
+                       .catch(e => console.log(e))
 })
 
 describe("Issueing ticket ...", () => {

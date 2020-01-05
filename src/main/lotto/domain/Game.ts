@@ -48,7 +48,7 @@ export class Game {
 
   constructor(pickGroup: PickGroup) {
     if (ContainerUtils.hasOnlyDistinctElements(pickGroup)) {
-      this.picks = new Set(pickGroup.sort((a, b) => a - b))
+      this.picks = new Set([...pickGroup].sort((a, b) => a - b))
     } else {
       throw new UserInputError("각기 다른 번호를 입력해주세요.")
     }

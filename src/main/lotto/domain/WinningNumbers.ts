@@ -10,7 +10,7 @@ export class WinningNumbers implements ValueObject {
       private readonly _round: Round,
       private readonly _mains: Game,
       private readonly _bonus: PickedNumber,
-      private readonly prizes: Money[]
+      private readonly prizes: Readonly<Money[]>
   ) {
     if (prizes.length !== LOWEST_TIER || prizes.some(prize => prize <= 0)) {
       throw new UserInputError("상금이 잘못 입력되었습니다.")

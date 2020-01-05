@@ -18,7 +18,8 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  getConnection().close()
+  await getConnection().close()
+                       .catch(e => console.log(e))
 })
 
 describe("Purchasing lotto...", () => {

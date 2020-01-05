@@ -8,10 +8,11 @@ import { connectTestDB, APPROXIMATE_RECENT_ROUND as RECENT_ROUND_MOCK } from "..
 import { LottoMachine } from "../../main/lotto/service/LottoMachine"
 
 const app = container.get<App>(App)
+const server = app.getHttpServer()
 
 beforeAll(async () => {
   await connectTestDB()
-  app.getHttpServer().listen(8080)
+  server.listen(8080)
 })
 
 afterAll(async () => {
@@ -20,8 +21,8 @@ afterAll(async () => {
 
 describe("Price?", () => {
   it(`${LottoShop.PRICE_PER_GAME}`, async () => {
-    const res = await supertest(app.getHttpServer()).get("/api?query={price}")
-                                                .expect(200)
+    const res = await supertest(server).get("/api?query={price}")
+                                       .expect(200)
     expect(res.body).toEqual({
       data: {
         price: LottoShop.PRICE_PER_GAME
@@ -32,8 +33,8 @@ describe("Price?", () => {
 
 describe("Maximum purchase amount?", () => {
   it(`${LottoMachine.MAX_PURCHASE_AMOUNT}`, async () => {
-    const res = await supertest(app.getHttpServer()).get("/api?query={maxPurchaseAmount}")
-                                                .expect(200)
+    const res = await supertest(server).get("/api?query={maxPurchaseAmount}")
+                                       .expect(200)
     expect(res.body).toEqual({
       data: {
         maxPurchaseAmount: LottoMachine.MAX_PURCHASE_AMOUNT
@@ -44,8 +45,8 @@ describe("Maximum purchase amount?", () => {
 
 describe("Recent round?", () => {
   it(`${RECENT_ROUND_MOCK}`, async () => {
-    const res = await supertest(app.getHttpServer()).get("/api?query={recentRound}")
-                                                .expect(200)
+    const res = await supertest(server).get("/api?query={recentRound}")
+                                       .expect(200)
     expect(res.body).toEqual({
       data: {
         recentRound: RECENT_ROUND_MOCK.num
