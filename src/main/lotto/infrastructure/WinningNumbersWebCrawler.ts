@@ -51,13 +51,13 @@ export class WinningNumbersWebCrawler implements WinningNumbersApiClient {
   protected parseWinningNumbersAndPrizes(response: string): Maybe<{ game: Game, bonus: PickedNumber, prizes: Money[] }> {
     return Maybe(response.match(NUMBERS_PATTERN)?.map(str => parseInt(str.substring(1), 10))).bind(numbers =>
       Maybe(numbers.pop()).bind(bonus =>
-        Maybe(response.match(PRIZES_PATTERN)?.map(str => parseInt(str.replace(/\,/g, "").substring(8), 10))).map(prizes =>
-          ({
-            game: new Game(PickGroup(numbers.map(n => PickedNumber(n)))),
-            bonus: PickedNumber(bonus),
-            prizes: prizes as Money[]
-          }))
-    ))
+        Maybe(response.match(PRIZES_PATTERN)?.map(str => parseInt(str.replace(/\,/g, "").substring(8), 10))).map(prizes => ({
+          game: new Game(PickGroup(numbers.map(n => PickedNumber(n)))),
+          bonus: PickedNumber(bonus),
+          prizes: prizes as Money[]
+        }))
+      )
+    )
   }
 
   protected parseRecentRound(response: string): Maybe<Round> {

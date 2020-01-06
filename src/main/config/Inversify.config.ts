@@ -1,4 +1,3 @@
-import "reflect-metadata"
 import { Container } from "inversify"
 import Router from "koa-router"
 import { Controller } from "./Controller"

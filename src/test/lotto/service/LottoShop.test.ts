@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import fc from "fast-check"
 import { container } from "../../../main/config/Inversify.config"
 import { Game } from "../../../main/lotto/domain/Game"
@@ -6,13 +7,13 @@ import { WinningNumbersApiClient } from "../../../main/lotto/service/WinningNumb
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 import { getConnection } from "typeorm"
 import { LottoShop } from "../../../main/lotto/service/LottoShop"
-import { connectTestDB } from "../../TestUtils"
+import { connectTestDatabase } from "../../TestUtils"
 
 let lottoShop: LottoShop
 let recentWinningNumbers: WinningNumbers
 
 beforeAll(async () => {
-  await connectTestDB()
+  await connectTestDatabase()
   lottoShop = container.get<LottoShop>(LottoShop)
   recentWinningNumbers = await container.get<WinningNumbersApiClient>(WinningNumbersApiClient).getRecent()
 })

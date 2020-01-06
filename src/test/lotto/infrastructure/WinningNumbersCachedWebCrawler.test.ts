@@ -4,21 +4,22 @@ import { WinningNumbersApiClient } from "../../../main/lotto/service/WinningNumb
 import { getConnection } from "typeorm"
 import { WinningNumbers } from "../../../main/lotto/domain/WinningNumbers"
 import { WinningNumbersEntityAdapter, WinningNumbersCachedWebCrawler } from "../../../main/lotto/infrastructure/WinningNumbersCachedWebCrawler"
-import { APPROXIMATE_RECENT_ROUND, connectTestDB } from "../../TestUtils"
+import { APPROXIMATE_RECENT_ROUND, connectTestDatabase } from "../../TestUtils"
 import { TIER } from "../../../main/lotto/domain/Tier"
 
 let winningNumbersApiClient: WinningNumbersApiClient
 
 beforeAll(async () => {
-  await connectTestDB()
+  await connectTestDatabase()
 })
 
-beforeEach(async () => {
+beforeEach(() => {
   winningNumbersApiClient = new WinningNumbersCachedWebCrawler()
 })
 
-afterAll(() => {
-  getConnection().close()
+afterAll(async () => {
+  await getConnection().close()
+                       .catch(e => console.log(e))
 })
 
 describe("The winner of round n is ...", () => {

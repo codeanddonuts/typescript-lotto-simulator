@@ -9,6 +9,7 @@ import { ApolloServer, makeExecutableSchema } from "apollo-server-koa"
 import { createConnection, getConnectionOptions, getConnection } from "typeorm"
 import { WinningNumbersEntity } from "../lotto/infrastructure/WinningNumbersCachedWebCrawler"
 import { __basedir } from "../__basedir"
+import { container } from "./Inversify.config"
 
 const IS_DEV_MODE = process.env.NODE_ENV !== "production"
 
@@ -16,7 +17,7 @@ const enum HttpStatus {
   NOT_FOUND = 404
 }
 
-export class App {
+class Server {
   private static readonly API_URL = "/api"
   private static readonly STATIC_FILES_DIR = "/public"
   private static readonly PORT = IS_DEV_MODE ? 3000 : 80
@@ -37,11 +38,11 @@ export class App {
       playground: IS_DEV_MODE,
       debug: IS_DEV_MODE,
     })
-    apollo.applyMiddleware({ app: koa, path: App.API_URL })
+    apollo.applyMiddleware({ app: koa, path: Server.API_URL })
     this.setDefaultRoutings()
     koa.use(logger())
        .use(compress())
-       .use(serve(__basedir + App.STATIC_FILES_DIR))
+       .use(serve(__basedir + Server.STATIC_FILES_DIR))
        .use(this.router.routes())
        .use(this.router.allowedMethods())
     this.server = http.createServer(koa.callback())
@@ -57,9 +58,9 @@ export class App {
     })
   }
 
-  public async start() : Promise<App> {
+  public async start() : Promise<Server> {
     await this.connectDatabase()
-    this.server.listen(App.PORT)
+    this.server.listen(Server.PORT)
     return this
   }
 
@@ -86,3 +87,8 @@ export class App {
     return this.server
   }
 }
+
+export const App = () => new Server(
+    container.get<Router>(Router),
+    container.getAll<Controller>(Controller)
+)

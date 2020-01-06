@@ -3,7 +3,7 @@ import { Round } from "../main/lotto/domain/Round"
 import moment from "moment"
 import { WinningNumbersEntity } from "../main/lotto/infrastructure/WinningNumbersCachedWebCrawler"
 
-export const connectTestDB = async () => {
+export const connectTestDatabase = async () => {
   return createConnection(
       Object.assign(
           await getConnectionOptions(), {

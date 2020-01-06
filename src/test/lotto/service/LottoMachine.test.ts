@@ -1,16 +1,17 @@
+import "reflect-metadata"
 import fc from "fast-check"
 import { container } from "../../../main/config/Inversify.config"
 import { Game } from "../../../main/lotto/domain/Game"
 import { LottoMachine } from "../../../main/lotto/service/LottoMachine"
 import { Ticket } from "../../../main/lotto/domain/Ticket"
 import { getConnection } from "typeorm"
-import { APPROXIMATE_RECENT_ROUND, connectTestDB } from "../../TestUtils"
+import { APPROXIMATE_RECENT_ROUND, connectTestDatabase } from "../../TestUtils"
 import { Round } from "../../../main/lotto/domain/Round"
 
 let lottoMachine: LottoMachine
 
 beforeAll(async () => {
-  await connectTestDB()
+  await connectTestDatabase()
   lottoMachine = container.get<LottoMachine>(LottoMachine)
 })
 

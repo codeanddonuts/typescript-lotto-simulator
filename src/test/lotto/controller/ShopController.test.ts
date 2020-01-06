@@ -1,22 +1,16 @@
 import "reflect-metadata"
 require("iconv-lite").encodingExists("cesu8")
-import { container } from "../../../main/config/Inversify.config"
 import supertest from "supertest"
 import { LottoShop } from "../../../main/lotto/service/LottoShop"
-import { connectTestDB, APPROXIMATE_RECENT_ROUND as RECENT_ROUND_MOCK } from "../../TestUtils"
+import { connectTestDatabase, APPROXIMATE_RECENT_ROUND as RECENT_ROUND_MOCK } from "../../TestUtils"
 import { LottoMachine } from "../../../main/lotto/service/LottoMachine"
-import Router from "koa-router"
-import { Controller } from "../../../main/config/Controller"
 import { App } from "../../../main/config/App.config"
 
-const app = new App(
-  container.get<Router>(Router),
-  container.getAll<Controller>(Controller)
-)
+const app = App()
 const server = app.getHttpServer()
 
 beforeAll(async () => {
-  await connectTestDB()
+  await connectTestDatabase()
   server.listen(8080)
 })
 
