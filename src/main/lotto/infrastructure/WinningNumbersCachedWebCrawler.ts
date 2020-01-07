@@ -17,31 +17,28 @@ export class WinningNumbersCachedWebCrawler extends WinningNumbersWebCrawler {
     return (await this.retrieveFromCacheOrParseNew(round)).getOrThrow(WinningNumbersFetchFailureException.of(round))
   }
 
-  public async getRecent(): Promise<WinningNumbers> | never {
+  public getRecent(): Promise<WinningNumbers> | never {
     return PromiseMaybeT.cons(super.requestFromWeb()).bind(response =>
       PromiseMaybeT.liftMaybe(super.parseRecentRound(response)).bind(round =>
         PromiseMaybeT.cons(this.retrieveFromCacheOrParseNew(round, response))
       )
-    ).run()
-    .then(res => res.getOrThrow(WinningNumbersFetchFailureException.ofRecent()))
+    ).run().then(res => res.getOrThrow(WinningNumbersFetchFailureException.ofRecent()))
   }
 
-  private async retrieveFromCacheOrParseNew(round: Round, response?: string): Promise<Maybe<WinningNumbers>> {
+  private retrieveFromCacheOrParseNew(round: Round, response?: string): Promise<Maybe<WinningNumbers>> {
     const cache = getConnection().getRepository(WinningNumbersEntity)
     return PromiseMaybeT.liftPromise(cache.findOne({ where: { round: round.num }, cache: true }))
                         .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
                         .orElse(() =>
            PromiseMaybeT.lift(response)
                         .orElse(() => PromiseMaybeT.cons(super.requestFromWeb(round)))
-                        .bind(response =>
-                          PromiseMaybeT.liftMaybe(super.parseWinningNumbersAndPrizes(response)
-                                       .map(result => {
-                                          const winningNumbers = new WinningNumbers(round, result.game, result.bonus, result.prizes)
-                                          cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
-                                          return winningNumbers
-                                       })
-                        ))
-    ).run()
+                        .bind(response => PromiseMaybeT.liftMaybe(super.parseWinningNumbersAndPrizes(response)))
+                        .map(result => {
+                          const winningNumbers = new WinningNumbers(round, result.game, result.bonus, result.prizes)
+                          cache.save(WinningNumbersEntityAdapter.convertWinningNumbersToEntity(winningNumbers))
+                          return winningNumbers
+                        })
+      ).run()
   }
 }
 

@@ -3,7 +3,7 @@ import { WinningNumbers } from "../domain/WinningNumbers"
 import { Game, PickGroup } from "../domain/Game"
 import { PickedNumber } from "../domain/Pick"
 import axios from "axios"
-import { Maybe, Nothing } from "../../utils/Maybe"
+import { Maybe, Nothing, Just } from "../../utils/Maybe"
 import * as iconv from "iconv-lite"
 import { WinningNumbersApiClient } from "../service/WinningNumbersApiClient"
 import { Money } from "../domain/Money"
@@ -34,19 +34,11 @@ export class WinningNumbersWebCrawler implements WinningNumbersApiClient {
     ).getOrThrow(WinningNumbersFetchFailureException.ofRecent())
   }
 
-  protected async requestFromWeb(round?: Round): Promise<Maybe<string>> {
-    try {
-      const url = FETCH_URL + (round ? (FETCH_URL_ROUND_ATTR + round) : "")
-      return Maybe(
-          iconv.decode(
-              (await axios.get(url, { responseType: "arraybuffer" })).data,
-              "euc-kr"
-          ).toString()
-      )
-    } catch (e) {
-      return Nothing()
+  protected requestFromWeb(round?: Round): Promise<Maybe<string>> {
+    const url = FETCH_URL + (round ? (FETCH_URL_ROUND_ATTR + round) : "")
+    return axios.get(url, { responseType: "arraybuffer" }).then(res => Just(iconv.decode(res.data, "euc-kr").toString()))
+                                                          .catch(() => Nothing())
     }
-  }
 
   protected parseWinningNumbersAndPrizes(response: string): Maybe<{ game: Game, bonus: PickedNumber, prizes: Money[] }> {
     return Maybe(response.match(NUMBERS_PATTERN)?.map(str => parseInt(str.substring(1), 10))).bind(numbers =>
