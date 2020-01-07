@@ -26,12 +26,13 @@ export const model = async actions => {
 
   const validateInvestmentAmount = value => {
     const investment = (() => {
-      if (isNaN(value) || value < 0) {
+      const parsed = parseInt(value)
+      if (isNaN(parsed) || parsed < 0) {
         return 0
-      } else if (value > purchaseLimit) {
+      } else if (parsed > purchaseLimit) {
         return purchaseLimit
       }
-      return parseInt(value, 10)
+      return parsed
     })()
     maxManualPicks = Math.floor(investment / shopInfo.price)
     const difference = numberOfManualPicks - maxManualPicks

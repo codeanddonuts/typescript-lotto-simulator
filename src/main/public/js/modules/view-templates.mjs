@@ -6,7 +6,7 @@ export class ViewTemplates {
         "afterbegin",
         `<div id="front-page" class="inner">
           <header class="special">
-            <h2>장당 ${formattedPrice}, 최대 ${maxPurchaseAmount}장</h2>
+            <h2>게임당 ${formattedPrice}, 최대 ${maxPurchaseAmount} 게임</h2>
             <p>(수동으로 입력하지 않은 만큼은 자동 발권됩니다.)</p>
           </header>
           <section>

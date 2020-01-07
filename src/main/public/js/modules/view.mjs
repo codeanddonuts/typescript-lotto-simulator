@@ -28,12 +28,11 @@ export const view = ({ shopInfo, state$, error }) => {
 
   const addManualPick = ({ isFirstManualPick, error }) => {
     if (error) {
-      alert(error)
-    } else {
-      manualPicksContainer.insertAdjacentHTML("beforeend", templates.bakeManualInputBox())
-      if (isFirstManualPick) {
-        manualPicksInputGuide.innerText = `쉼표로 ${NUMBER_OF_PICKS}개의 번호를 구분하여 입력해주세요.`
-      }
+      return alert(error)
+    }
+    manualPicksContainer.insertAdjacentHTML("beforeend", templates.bakeManualInputBox())
+    if (isFirstManualPick) {
+      manualPicksInputGuide.innerText = `쉼표로 ${NUMBER_OF_PICKS}개의 번호를 구분하여 입력해주세요.`
     }
   }
 
@@ -59,12 +58,11 @@ export const view = ({ shopInfo, state$, error }) => {
 
   const renderResultPage = ({ result, error }) => {
     if (error) {
-      alert(error)
-    } else {
-      const view = templates.bakeResultPage(result)
-      document.getElementById("front-page").outerHTML = ""
-      main.insertAdjacentHTML("beforeend", view)
+      return alert(error)
     }
+    const view = templates.bakeResultPage(result)
+    document.getElementById("front-page").outerHTML = ""
+    main.insertAdjacentHTML("beforeend", view)
   }
 
   const resetView = () => {
