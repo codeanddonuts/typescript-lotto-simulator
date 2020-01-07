@@ -53,23 +53,35 @@ export class ViewTemplates {
     return '<input class="manual-pick" type="text" name="manual-pick"><br />'
   }
 
-  bakeResultPage({ totalPurchaseAmount, totalPrize }) {
+  bakeResultPage({ round, games, winningNumbers, totalPrize }) {
     return `
       <div id="result-page" class="inner center">
         <section>
           <div class="content">
-            <b>제 {round}회</b> : {winningNumbers}
+            <b>제 ${round}회</b> : ${this.formatWinningNumbers(winningNumbers)}
           </div>
           <br />
           <div class="content">
-            {purchasedLottos}
+            <b>${games.length}줄 구매<br />${totalPrize}원 당첨</b>
           </div>
           <br />
           <div class="content">
-            ${totalPurchaseAmount}줄 구매, ${totalPrize}원 당첨
+            ${this.formatLottos(games)}
           </div>
         </section>
-      <br /><br /><br /><button id="replay">다시 플레이</button>
+      <br />
+      <br />
+      <br />
+      <button id="replay">다시 플레이</button>
     `
+  }
+
+  formatWinningNumbers({ mains, bonus }) {
+    return mains.map(n => `<span class="ball color${Math.floor(n / 10)}">${n}</span>`).join("")
+    + ` + <span class="ball color5">${bonus}</span>`
+  }
+
+  formatLottos(games) {
+    return games.map(game => `<span class="lotto">${game}</span>`).join("<br />")
   }
 }

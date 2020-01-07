@@ -15,8 +15,7 @@ export class LottoMachine {
   public async issue(manualPicks: PickGroup[], autoAmount: number, round?: Round): Promise<Ticket> | never {
     if (manualPicks.length + autoAmount <= 0) {
       throw new UserInputError("먼저 번호를 입력하세요.")
-    }
-    if (manualPicks.length + autoAmount > LottoMachine.MAX_PURCHASE_AMOUNT) {
+    } else if (manualPicks.length + autoAmount > LottoMachine.MAX_PURCHASE_AMOUNT) {
       throw new UserInputError(`최대 ${LottoMachine.MAX_PURCHASE_AMOUNT}장만 구매 가능합니다.`)
     }
     return new Ticket(

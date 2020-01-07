@@ -13,17 +13,22 @@ export class Api {
       const res = (await axios.post(
           "/api", {
             query:`
-              mutation ($investment: Int!, $manualPicks: [[Int!]!]!, $round: Int) {
-                purchase(investment: $investment, manualPicks: $manualPicks, round: $round) {
-                  totalPurchaseAmount
+              mutation ($round: Int, $investment: Int!, $manualPicks: [[Int!]!]) {
+                purchase(round: $round, investment: $investment, manualPicks: $manualPicks) {
+                  round
+                  games
+                  winningNumbers {
+                    mains
+                    bonus
+                  }
                   totalPrize
                 }
               }
             `,
             variables: {
+              round: round,
               investment: investment,
-              manualPicks: manualPicks,
-              round: round
+              manualPicks: manualPicks
             }
           }
         )

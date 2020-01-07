@@ -19,7 +19,7 @@ export const PickGroup = (pickedNumbers: PickedNumber[]): PickGroup | never => {
   throw new UserInputError("6개의 숫자만을 입력해주시기 바랍니다.")
 }
 
-export class Game {
+export class Game implements Iterable<PickedNumber> {
   public static readonly NUMBER_OF_PICKS = NUMBER_OF_PICKS
 
   private static readonly BALLS: PickedNumber[] = ContainerUtils.intRangeClosed(PICK_RANGE.MIN, PICK_RANGE.MAX)
@@ -49,5 +49,9 @@ export class Game {
 
   public getNthPick(i: IndicesOfPicks): PickedNumber {
     return [...this.picks.values()][i - 1]
+  }
+
+  public [Symbol.iterator](): Iterator<PickedNumber> {
+    return this.picks.values()
   }
 }

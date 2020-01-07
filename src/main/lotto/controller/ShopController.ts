@@ -8,6 +8,8 @@ import { Money } from "../domain/Money"
 import { PickGroup } from "../domain/Game"
 import { PickedNumber } from "../domain/Pick"
 import { Round } from "../domain/Round"
+import { Ticket } from "../domain/Ticket"
+import { WinningNumbers } from "../domain/WinningNumbers"
 
 @injectable()
 export class ShopController implements Controller {
@@ -24,13 +26,20 @@ export class ShopController implements Controller {
         recentRound: Int!
       }
 
+      type WinningNumbers {
+        mains: [Int!]!
+        bonus: Int!
+      }
+
       type Report {
-        totalPurchaseAmount: Int!
+        round: Int!
+        games: [[Int!]!]!
+        winningNumbers: WinningNumbers!
         totalPrize: Int!
       }
 
       type Mutation {
-        purchase(investment: Int!, manualPicks: [[Int!]!]!, round: Int): Report
+        purchase(round: Int, investment: Int!, manualPicks: [[Int!]!]): Report
       }
     `
   }
@@ -43,13 +52,24 @@ export class ShopController implements Controller {
         recentRound: async () => (await this.winningNumbersApiClient.getRecent()).round.num
       },
       Mutation: {
-        purchase: async (_, { investment, manualPicks, round }) => {
+        purchase: async (_, { round, investment, manualPicks = [] }) => {
+          const validatedRound = round ? new Round(round) : (await this.winningNumbersApiClient.getRecent()).round
           const validatedPicks = (manualPicks as number[][]).map(numbers => PickGroup(numbers.map(n => PickedNumber(n))))
-          const winningNumbers = round ? this.winningNumbersApiClient.get(new Round(round)) : this.winningNumbersApiClient.getRecent()
-          const ticket = await this.lottoShop.purchase(investment as Money, validatedPicks, round ? new Round(round) : undefined)
-          return ticket.matchResult(await winningNumbers)
+          return this.writeReport(
+              await this.lottoShop.purchase(investment as Money, validatedPicks, validatedRound),
+              await this.winningNumbersApiClient.get(validatedRound)
+          )
         }
       }
+    }
+  }
+
+  private writeReport(ticket: Ticket, winningNumbers: WinningNumbers) {
+    return {
+      round: ticket.round.num,
+      games: ticket.games,
+      winningNumbers: winningNumbers,
+      totalPrize: ticket.matchResult(winningNumbers).totalPrize
     }
   }
 }
