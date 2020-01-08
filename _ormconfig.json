@@ -1,0 +1,11 @@
+{
+  "type": "mysql",
+  "host": "host.docker.internal",
+  "port": 3306,
+  "username": "",
+  "password": "",
+  "database": "",
+  "synchronize": true,
+  "logging": false,
+  "cache": true
+}
