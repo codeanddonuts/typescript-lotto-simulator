@@ -1,7 +1,8 @@
 out/
 
 node_modules/
-package.json
+
+ormconfig.json
 
 coverage/
 report.*.json
