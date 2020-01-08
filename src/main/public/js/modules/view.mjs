@@ -9,17 +9,11 @@ export const view = ({ shopInfo, state$, error }) => {
 
   const templates = new ViewTemplates()
   const frontPage = templates.bakeFrontPage(shopInfo)
+  const top = document.getElementById("top")
   const main = document.getElementsByTagName("main")[0]
-  let investmentInput
-  let manualPicksContainer
-  let manualPicksInputGuide
-
-  const renderFrontPage = () => {
-    main.appendChild(frontPage)
-    investmentInput = document.getElementById("investment")
-    manualPicksContainer = document.getElementById("manual-picks-container")
-    manualPicksInputGuide = document.getElementById("guide")
-  }
+  const investmentInput = frontPage.querySelector("#investment")
+  const manualPicksContainer = frontPage.querySelector("#manual-picks-container")
+  const manualPicksInputGuide = frontPage.querySelector("#guide")
 
   const resetInvestmentAmount = ({ investment, manualInputRemoveAmount }) => {
     investmentInput.value = investment
@@ -63,18 +57,22 @@ export const view = ({ shopInfo, state$, error }) => {
     const view = templates.bakeResultPage(result)
     document.getElementById("front-page").outerHTML = ""
     main.insertAdjacentHTML("beforeend", view)
+    top.scrollIntoView()
   }
 
   const resetView = () => {
     document.getElementById("result-page").outerHTML = ""
-    renderFrontPage()
+    investmentInput.value = 0
+    manualPicksContainer.innerHTML = ""
+    main.appendChild(frontPage)
+    top.scrollIntoView()
   }
   
-  renderFrontPage()
   state$.investment$.subscribe(x => resetInvestmentAmount(x))
   state$.resetInvalidManualPick$.subscribe(x => clearInvalidManualPick(x))
   state$.addManualPick$.subscribe(x => addManualPick(x))
   state$.removeManualPick$.subscribe(x => removeManualPick(x))
   state$.result$.subscribe(x => renderResultPage(x))
   state$.replay$.subscribe(() => resetView())
+  main.appendChild(frontPage)
 }

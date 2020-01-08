@@ -20,7 +20,7 @@ const enum HttpStatus {
 class Server {
   private static readonly API_URL = "/api"
   private static readonly STATIC_FILES_DIR = "/public"
-  private static readonly PORT = IS_DEV_MODE ? 3000 : 80
+  private static readonly PORT = 3000
  
   private readonly server: http.Server
 
