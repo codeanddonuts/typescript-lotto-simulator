@@ -1,14 +1,14 @@
-import { Round } from "../domain/Round"
-import { WinningNumbers } from "../domain/WinningNumbers"
-import { Game, PickGroup } from "../domain/Game"
-import { PickedNumber } from "../domain/PickedNumber"
-import axios from "axios"
-import { Maybe, Nothing, Just } from "../../utils/Maybe"
-import * as iconv from "iconv-lite"
-import { WinningNumbersApiClient } from "../service/WinningNumbersApiClient"
-import { Money } from "../domain/Money"
-import { injectable } from "inversify"
-import { WinningNumbersFetchFailureException } from "./WinningNumbersFetchFailureException"
+import axios from 'axios'
+import * as iconv from 'iconv-lite'
+import { injectable } from 'inversify'
+import { Just, Maybe, Nothing } from '../../utils/Maybe'
+import { Game, PickGroup } from '../domain/Game'
+import { Money } from '../domain/Money'
+import { PickedNumber } from '../domain/PickedNumber'
+import { Round } from '../domain/Round'
+import { WinningNumbers } from '../domain/WinningNumbers'
+import { WinningNumbersApiClient } from '../service/WinningNumbersApiClient'
+import { WinningNumbersFetchFailureException } from './WinningNumbersFetchFailureException'
 
 const FETCH_URL = "https://m.dhlottery.co.kr/gameResult.do?method=byWin"
 const FETCH_URL_ROUND_ATTR = "&drwNo="
@@ -19,9 +19,9 @@ const RECENT_ROUND_PATTERN = /<option value="\d+"  >/
 @injectable()
 export class WinningNumbersWebCrawler implements WinningNumbersApiClient {
   public async get(round: Round): Promise<WinningNumbers> | never {
-      return (await this.requestFromWeb(round)).bind(response => this.parseWinningNumbersAndPrizes(response))
-                                               .map(result => new WinningNumbers(round, result.game, result.bonus, result.prizes))
-                                               .getOrThrow(WinningNumbersFetchFailureException.of(round))
+    return (await this.requestFromWeb(round)).bind(response => this.parseWinningNumbersAndPrizes(response))
+                                             .map(result => new WinningNumbers(round, result.game, result.bonus, result.prizes))
+                                             .getOrThrow(WinningNumbersFetchFailureException.of(round))
   }
 
   public async getRecent(): Promise<WinningNumbers> | never {

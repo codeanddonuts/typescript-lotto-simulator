@@ -1,37 +1,50 @@
-import { Round } from "../domain/Round"
-import { WinningNumbers } from "../domain/WinningNumbers"
-import { Game } from "../domain/Game"
-import { PickedNumber } from "../domain/PickedNumber"
-import { PromiseMaybeT } from "../../utils/MaybeT"
 import { injectable } from "inversify"
-import { getConnection, Entity, PrimaryColumn, Column } from "typeorm"
-import { Money } from "../domain/Money"
-import { TIER } from "../domain/Tier"
-import { WinningNumbersWebCrawler } from "./WinningNumbersWebCrawler"
+import moment = require("moment")
+import { Column, Entity, getConnection, PrimaryColumn } from "typeorm"
 import { Maybe } from "../../utils/Maybe"
+import { PromiseMaybeT } from "../../utils/MaybeT"
+import { Game } from "../domain/Game"
+import { Money } from "../domain/Money"
+import { PickedNumber } from "../domain/PickedNumber"
+import { Round } from "../domain/Round"
+import { TIER } from "../domain/Tier"
+import { WinningNumbers } from "../domain/WinningNumbers"
 import { WinningNumbersFetchFailureException } from "./WinningNumbersFetchFailureException"
+import { WinningNumbersWebCrawler } from "./WinningNumbersWebCrawler"
+
+const APPROXIMATE_RECENT_ROUND = new Round(889 + moment(Date.now()).diff(moment("2019-12-14T12:00:00Z"), "weeks"))
+const RECENT_ROUND_FETCH_INTERVAL = 150
 
 @injectable()
 export class WinningNumbersCachedWebCrawler extends WinningNumbersWebCrawler {
+  private recentRound = APPROXIMATE_RECENT_ROUND
+
+  constructor() {
+    super()
+    setInterval(async () => this.recentRound = await this.fetchRecentRound(), RECENT_ROUND_FETCH_INTERVAL * 1000)
+  }
+
+  private async fetchRecentRound(): Promise<Round> {
+    return PromiseMaybeT.cons(super.requestFromWeb())
+                        .bind(response => PromiseMaybeT.liftMaybe(super.parseRecentRound(response)))
+                        .run()
+                        .then(res => res.getOrElse(() => this.recentRound))
+  }
+
   public async get(round: Round): Promise<WinningNumbers> | never {
     return (await this.retrieveFromCacheOrParseNew(round)).getOrThrow(WinningNumbersFetchFailureException.of(round))
   }
 
-  public getRecent(): Promise<WinningNumbers> | never {
-    return PromiseMaybeT.cons(super.requestFromWeb()).bind(response =>
-      PromiseMaybeT.liftMaybe(super.parseRecentRound(response)).bind(round =>
-        PromiseMaybeT.cons(this.retrieveFromCacheOrParseNew(round, response))
-      )
-    ).run().then(res => res.getOrThrow(WinningNumbersFetchFailureException.ofRecent()))
+  public async getRecent(): Promise<WinningNumbers> | never {
+    return (await this.retrieveFromCacheOrParseNew(this.recentRound)).getOrThrow(WinningNumbersFetchFailureException.ofRecent())
   }
 
-  private retrieveFromCacheOrParseNew(round: Round, response?: string): Promise<Maybe<WinningNumbers>> {
+  private retrieveFromCacheOrParseNew(round: Round): Promise<Maybe<WinningNumbers>> {
     const cache = getConnection().getRepository(WinningNumbersEntity)
     return PromiseMaybeT.liftPromise(cache.findOne({ where: { round: round.num }, cache: true }))
                         .map(entity => WinningNumbersEntityAdapter.convertEntityToWinningNumbers(entity))
                         .orElse(() =>
-           PromiseMaybeT.lift(response)
-                        .orElse(() => PromiseMaybeT.cons(super.requestFromWeb(round)))
+           PromiseMaybeT.cons(super.requestFromWeb(round))
                         .bind(response => PromiseMaybeT.liftMaybe(super.parseWinningNumbersAndPrizes(response)))
                         .map(result => {
                           const winningNumbers = new WinningNumbers(round, result.game, result.bonus, result.prizes)
