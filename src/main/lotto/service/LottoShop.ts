@@ -12,10 +12,14 @@ export class LottoShop {
 
   constructor(@inject(LottoMachine) private readonly lottoMachine: LottoMachine) {}
 
-  public purchase(investment: Money, manualPicks: PickGroup[], round?: Round): Promise<Ticket> | never{
+  public purchase(investment: Money, manualPicks: PickGroup[], round?: Round): Promise<Ticket> | never {
     if (investment < LottoShop.PRICE_PER_GAME) {
       throw new UserInputError("지불 금액이 부족합니다.")
     }
-    return this.lottoMachine.issue(manualPicks, Math.floor(investment / LottoShop.PRICE_PER_GAME) - manualPicks.length, round)
+    const maxPurchaseAmount = Math.floor(investment / LottoShop.PRICE_PER_GAME)
+    if (manualPicks.length > maxPurchaseAmount) {
+      throw new UserInputError("수동 입력이 너무 많습니다.")
+    }
+    return this.lottoMachine.issue(manualPicks, maxPurchaseAmount - manualPicks.length, round)
   }
 }

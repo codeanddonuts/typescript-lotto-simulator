@@ -1,5 +1,5 @@
-import { NUMBER_OF_PICKS, PICK_RANGE } from "./model.mjs"
-import { ViewTemplates } from "./view-templates.mjs"
+import { NUMBER_OF_PICKS, PICK_RANGE } from './model.mjs'
+import { ViewTemplates } from './view-templates.mjs'
 
 export const view = ({ shopInfo, state$, error }) => {
   if (error) {

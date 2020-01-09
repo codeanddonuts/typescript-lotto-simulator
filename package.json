@@ -5,7 +5,8 @@
   "main": "./src/main/App.ts",
   "jest": {
     "verbose": true,
-    "preset": "ts-jest"
+    "preset": "ts-jest",
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "codeanddonuts",

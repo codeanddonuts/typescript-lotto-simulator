@@ -1,7 +1,6 @@
-import { Api } from "./api.mjs"
+import { Api } from './api.mjs'
 const map = rxjs.operators.map
 const flatMap = rxjs.operators.mergeMap
-const from = rxjs.from
 const tap = rxjs.operators.tap
 
 export const NUMBER_OF_PICKS = 6
@@ -115,7 +114,7 @@ export const model = async actions => {
       addManualPick$: actions.clickAddButton$.pipe(map(x => checkMaxManualPicks(x))),
       removeManualPick$: actions.clickRemoveButton$.pipe(map(x => checkIfNoManualPicksExist(x))),
       resetInvalidManualPick$: actions.changeManualPick$.pipe(map(x => validateManualPick(x))),
-      result$: actions.submitPurchase$.pipe(flatMap(x => from(purchase(x)))),
+      result$: actions.submitPurchase$.pipe(flatMap(x => rxjs.from(purchase(x)))),
       replay$: actions.submitReplay$.pipe(tap(() => reset()))
     }
   }
